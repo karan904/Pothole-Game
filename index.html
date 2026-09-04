@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+  <meta name="theme-color" content="#11130f" />
+  <meta name="description" content="A fast civic arcade game about fixing potholes—and why they keep coming back." />
+  <title>Gaddha — The road fights back</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+    :root{--ink:#11130f;--paper:#f2f0e8;--acid:#dfff00;--orange:#ff6b18;--blue:#3ed6e0;--muted:#a9aaa1;--line:rgba(242,240,232,.18)}
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    html,body{width:100%;height:100%;overflow:hidden;background:#090a08;color:var(--paper);font-family:Inter,system-ui,sans-serif}
+    button,input{font:inherit} button{cursor:pointer} [hidden]{display:none!important}
+    .shell{height:100%;display:grid;grid-template-columns:minmax(0,1fr) min(370px,31vw);background:var(--ink);position:relative}
+    .game{position:relative;min-width:0;overflow:hidden;background:#23251f}
+    canvas{display:block;width:100%;height:100%;touch-action:none}
+    .grain{position:absolute;inset:0;pointer-events:none;opacity:.12;mix-blend-mode:soft-light;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E")}
+    .topbar{position:absolute;z-index:4;top:0;left:0;right:0;padding:18px 20px;display:flex;align-items:flex-start;justify-content:space-between;pointer-events:none;background:linear-gradient(#11130fe8,transparent)}
+    .brand{font-family:'Archivo Black',Impact,sans-serif;font-size:clamp(22px,4vw,42px);line-height:.85;letter-spacing:-.055em;text-transform:uppercase;color:var(--acid)}
+    .brand small{display:block;font:600 10px/1.5 'IBM Plex Mono',monospace;letter-spacing:.15em;color:var(--paper);margin-top:7px}
+    .hud{display:flex;gap:8px;text-align:right}
+    .metric{min-width:76px;border-top:2px solid var(--paper);padding-top:7px}
+    .metric span{display:block;font:500 9px/1 'IBM Plex Mono',monospace;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+    .metric strong{font:600 21px/1.25 'IBM Plex Mono',monospace;color:var(--paper)}
+    .scenario{position:absolute;z-index:5;top:100px;left:20px;max-width:310px;pointer-events:none;transform:translateX(-130%);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+    .scenario.show{transform:none}.scenario-card{background:var(--acid);color:var(--ink);padding:12px 15px;border-left:7px solid var(--orange);box-shadow:7px 7px 0 #11130f}
+    .scenario-card b{font-family:'Archivo Black',sans-serif;text-transform:uppercase;font-size:19px;display:block}.scenario-card span{font:500 11px/1.4 'IBM Plex Mono',monospace}
+    .ticker{position:absolute;z-index:4;left:0;right:0;bottom:0;background:var(--acid);color:var(--ink);height:32px;display:flex;align-items:center;overflow:hidden;border-top:2px solid var(--ink)}
+    .ticker span{white-space:nowrap;font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;animation:ticker 24s linear infinite}
+    @keyframes ticker{to{transform:translateX(-50%)}}
+    .toast{position:absolute;z-index:6;left:50%;bottom:56px;transform:translate(-50%,20px);background:var(--paper);color:var(--ink);padding:9px 13px;font:600 11px 'IBM Plex Mono',monospace;opacity:0;transition:.2s;white-space:nowrap}.toast.show{opacity:1;transform:translate(-50%,0)}
+    .side{position:relative;border-left:1px solid var(--line);display:flex;flex-direction:column;background:#11130f;min-height:0}
+    .side-head{padding:24px 24px 18px;border-bottom:1px solid var(--line)}
+    .eyebrow{font:600 10px/1 'IBM Plex Mono',monospace;letter-spacing:.18em;text-transform:uppercase;color:var(--acid)}
+    .side h2{font:400 clamp(28px,3vw,48px)/.96 'Archivo Black',sans-serif;text-transform:uppercase;letter-spacing:-.04em;margin-top:10px}
+    .side h2 em{font-style:normal;color:var(--orange)}
+    .side-body{padding:20px 24px;display:flex;flex-direction:column;gap:18px;min-height:0;overflow:auto}
+    .brief{font-size:15px;line-height:1.55;color:#d1d0c8}.brief strong{color:var(--paper)}
+    .rule{height:1px;background:var(--line)}
+    .how{display:grid;gap:10px}.how-row{display:grid;grid-template-columns:35px 1fr;gap:11px;align-items:start}.how-num{font:600 12px 'IBM Plex Mono';color:var(--acid);border:1px solid var(--acid);width:30px;height:30px;display:grid;place-items:center}.how-row p{font-size:13px;line-height:1.35;color:#c1c2ba}.how-row b{display:block;color:var(--paper);font-size:13px;margin-bottom:2px}
+    .cta{margin-top:auto;display:grid;gap:9px}.primary,.secondary,.text-btn{border:0;text-transform:uppercase;font-weight:800;letter-spacing:.06em;min-height:52px;padding:0 18px}
+    .primary{background:var(--acid);color:var(--ink);box-shadow:5px 5px 0 var(--orange)}.primary:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--orange)}.primary:active{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--orange)}
+    .secondary{background:transparent;color:var(--paper);border:1px solid var(--line)}.secondary:hover{border-color:var(--acid);color:var(--acid)}
+    .micro{font:400 10px/1.5 'IBM Plex Mono',monospace;color:#85877e}
+    .panel{position:absolute;inset:0;z-index:10;background:#11130ff3;display:grid;place-items:center;padding:22px;overflow:auto}
+    .panel-inner{width:min(620px,100%);position:relative}.panel .kicker{font:600 11px 'IBM Plex Mono';color:var(--acid);letter-spacing:.16em;text-transform:uppercase;margin-bottom:13px}
+    .panel h1{font:400 clamp(42px,8vw,82px)/.83 'Archivo Black',sans-serif;letter-spacing:-.065em;text-transform:uppercase}.panel h1 span{color:var(--orange)}
+    .panel .lead{font-size:16px;line-height:1.5;color:#c9c9c1;max-width:480px;margin:22px 0}.panel-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center}.panel-actions .primary{min-width:210px}
+    .start-mark{position:absolute;right:0;top:-10px;width:80px;height:80px;border:1px solid var(--acid);border-radius:50%;display:grid;place-items:center;font:600 10px/1.2 'IBM Plex Mono';text-align:center;color:var(--acid);transform:rotate(9deg)}
+    .mode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);margin:24px 0}.mode{background:#171914;padding:14px 12px;min-height:100px}.mode small{font:500 9px 'IBM Plex Mono';color:var(--orange);letter-spacing:.1em}.mode b{font-size:13px;display:block;margin:7px 0 4px}.mode p{font-size:11px;line-height:1.35;color:#92948b}
+    .lab{width:min(700px,100%)}.lab-layout{display:grid;grid-template-columns:1fr 220px;gap:28px;margin:22px 0}.sliders{display:grid;gap:18px}.slider label{display:flex;justify-content:space-between;font:600 11px 'IBM Plex Mono';text-transform:uppercase;letter-spacing:.06em}.slider output{color:var(--acid)}input[type=range]{width:100%;margin-top:9px;accent-color:var(--acid)}
+    .receipt{background:var(--paper);color:var(--ink);padding:18px;transform:rotate(1deg);box-shadow:7px 7px 0 var(--orange)}.receipt small{font:600 9px 'IBM Plex Mono';letter-spacing:.12em}.receipt .years{font:400 50px/.9 'Archivo Black';margin:18px 0 4px}.receipt p{font:500 11px/1.5 'IBM Plex Mono'}.receipt hr{border:0;border-top:1px dashed #777;margin:14px 0}.receipt .cost{display:flex;justify-content:space-between;font:600 11px 'IBM Plex Mono'}
+    .result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);margin:20px 0}.result-grid div{background:#171914;padding:14px}.result-grid small{font:500 9px 'IBM Plex Mono';color:#92948b;text-transform:uppercase}.result-grid b{display:block;font:400 24px 'Archivo Black';margin-top:5px;color:var(--acid)}
+    .mute{position:absolute;z-index:7;right:16px;bottom:44px;border:1px solid var(--line);background:#11130fbb;color:var(--paper);width:38px;height:38px;font-size:16px}
+    @media(max-width:780px){.shell{display:block}.game{height:100%}.side{position:absolute;z-index:8;inset:0;background:transparent;border:0;pointer-events:none}.side-head{display:none}.side-body{padding:0;overflow:visible}.side .brief,.side .rule,.side .how,.side .micro{display:none}.side .cta{position:absolute;left:18px;right:18px;bottom:48px;pointer-events:auto}.side .cta .secondary{display:none}.side .cta .primary{width:100%}.topbar{padding:16px}.hud{gap:6px}.metric{min-width:58px}.metric strong{font-size:17px}.metric span{font-size:8px}.scenario{left:16px;top:84px}.ticker{height:28px}.panel{padding:18px}.panel-inner{padding-top:26px}.start-mark{width:62px;height:62px;font-size:8px}.mode-grid{grid-template-columns:1fr}.mode{min-height:0}.lab-layout{grid-template-columns:1fr}.receipt{transform:none}.result-grid{grid-template-columns:1fr 1fr}.panel h1{font-size:clamp(40px,14vw,68px)}}
+    @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="game" aria-label="Gaddha game area">
+      <canvas id="road" aria-label="A three-lane road. Tap or click potholes to repair them before traffic arrives."></canvas>
+      <div class="grain"></div>
+      <header class="topbar">
+        <div class="brand">Gaddha<small>Ward 27 / night crew</small></div>
+        <div class="hud" id="hud" hidden>
+          <div class="metric"><span>Road</span><strong id="health">100%</strong></div>
+          <div class="metric"><span>Fixed</span><strong id="fixed">00</strong></div>
+          <div class="metric"><span>Streak</span><strong id="streak">×1</strong></div>
+        </div>
+      </header>
+      <div class="scenario" id="scenario"><div class="scenario-card"><b id="scenarioTitle">Rush hour</b><span id="scenarioCopy">Traffic density rising.</span></div></div>
+      <div class="toast" id="toast">PATCH HELD +100</div>
+      <button class="mute" id="mute" aria-label="Toggle sound">♪</button>
+      <div class="ticker" aria-hidden="true"><span> TAP + HOLD TO PATCH • CLEAR AMBULANCE LANES FIRST • CHEAP PATCHES RETURN • DRAINAGE IS INFRASTRUCTURE • TAP + HOLD TO PATCH • CLEAR AMBULANCE LANES FIRST • CHEAP PATCHES RETURN • DRAINAGE IS INFRASTRUCTURE • </span></div>
+    </section>
+
+    <aside class="side" id="side">
+      <div class="side-head"><div class="eyebrow">Public works // arcade</div><h2>The road<br><em>fights back.</em></h2></div>
+      <div class="side-body">
+        <p class="brief">Patching is easy. Building a road that <strong>survives the monsoon</strong> is the real level.</p>
+        <div class="rule"></div>
+        <div class="how">
+          <div class="how-row"><span class="how-num">01</span><p><b>Press and hold</b>Fill cracks before vehicles reach them.</p></div>
+          <div class="how-row"><span class="how-num">02</span><p><b>Read the road</b>Puddles hide damage. Sinkholes take longer.</p></div>
+          <div class="how-row"><span class="how-num">03</span><p><b>Protect priority traffic</b>An ambulance crash costs double.</p></div>
+        </div>
+        <div class="cta"><button class="primary" id="startSide">Start night shift →</button><button class="secondary" id="learnSide">How the campaign works</button></div>
+        <p class="micro">A short civic game. No account. Your run stays on this device.</p>
+      </div>
+    </aside>
+
+    <section class="panel" id="startPanel">
+      <div class="panel-inner">
+        <div class="start-mark">30 SEC<br>SHIFT</div>
+        <p class="kicker">Municipal repair simulator / 01</p>
+        <h1>Fix fast.<br><span>Fix right.</span></h1>
+        <p class="lead">Three city conditions. One road crew. Patch each gaddha before traffic hits—and find out whether your work survives the rain.</p>
+        <div class="mode-grid">
+          <div class="mode"><small>ACT I</small><b>Rush hour</b><p>Fast traffic, visible cracks.</p></div>
+          <div class="mode"><small>ACT II</small><b>Monsoon</b><p>Hidden damage and washouts.</p></div>
+          <div class="mode"><small>ACT III</small><b>VIP diversion</b><p>Lane closures, priority vehicles.</p></div>
+        </div>
+        <div class="panel-actions"><button class="primary" id="start">Start night shift →</button><span class="micro">Mouse, touch, or keys 1—3</span></div>
+      </div>
+    </section>
+
+    <section class="panel" id="labPanel" hidden>
+      <div class="panel-inner lab">
+        <p class="kicker">Repair lab / spend what matters</p>
+        <h1>Make it<br><span>last.</span></h1>
+        <div class="lab-layout">
+          <div class="sliders">
+            <div class="slider"><label for="mix">Bitumen mix <output id="mixOut">60</output></label><input id="mix" type="range" min="10" max="100" value="60"></div>
+            <div class="slider"><label for="compact">Compaction <output id="compactOut">60</output></label><input id="compact" type="range" min="10" max="100" value="60"></div>
+            <div class="slider"><label for="drain">Drainage <output id="drainOut">40</output></label><input id="drain" type="range" min="10" max="100" value="40"></div>
+          </div>
+          <div class="receipt"><small>WARD WORK ORDER</small><div class="years"><span id="life">7</span><small> MONTHS</small></div><p id="verdict">A decent patch. The first heavy monsoon will expose the weak drainage.</p><hr><div class="cost"><span>EST. COST</span><span id="cost">₹3,520</span></div></div>
+        </div>
+        <div class="panel-actions"><button class="primary" id="testMix">Test this repair →</button></div>
+      </div>
+    </section>
+
+    <section class="panel" id="resultPanel" hidden>
+      <div class="panel-inner">
+        <p class="kicker">Shift complete / field report</p>
+        <h1 id="resultTitle">Road<br><span>reopened.</span></h1>
+        <div class="result-grid"><div><small>Potholes sealed</small><b id="rFixed">0</b></div><div><small>Road health</small><b id="rHealth">0%</b></div><div><small>Repair life</small><b id="rLife">0 mo</b></div></div>
+        <p class="lead" id="resultCopy">A lasting road is a system: the right material, proper compaction, and somewhere for rainwater to go.</p>
+        <div class="panel-actions"><button class="primary" id="again">Run another shift →</button><button class="secondary" id="share">Share field report</button></div>
+      </div>
+    </section>
+  </main>
+  <script>
+    const canvas=document.querySelector('#road'),ctx=canvas.getContext('2d');
+    const $=s=>document.querySelector(s), rand=(a,b)=>Math.random()*(b-a)+a, clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+    let W=0,H=0,dpr=1,roadX=0,roadW=0,laneW=0,last=0,running=false,t=0,health=100,fixed=0,streak=1,spawnAt=0,vehicleAt=0,active=null,sound=true,phase=-1,shake=0;
+    let holes=[],cars=[],bits=[],marks=[];
+    const phases=[
+      {at:0,title:'ACT I — RUSH HOUR',copy:'Visible cracks. Traffic density rising.',rain:0,speed:1,holes:1},
+      {at:10,title:'ACT II — MONSOON',copy:'Puddles hide damage. Repairs wash out.',rain:1,speed:1.08,holes:1.25},
+      {at:21,title:'ACT III — VIP DIVERSION',copy:'One lane closed. Ambulances get priority.',rain:.45,speed:1.26,holes:1.5}
+    ];
+    function resize(){const r=canvas.getBoundingClientRect();dpr=Math.min(devicePixelRatio||1,2);W=r.width;H=r.height;canvas.width=W*dpr;canvas.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);roadW=Math.min(W*.76,560);roadX=(W-roadW)/2;laneW=roadW/3}
+    addEventListener('resize',resize);resize();
+    class Hole{
+      constructor(){this.lane=Math.floor(rand(0,3));this.x=roadX+laneW*(this.lane+.5)+rand(-laneW*.15,laneW*.15);this.y=-60;this.r=rand(18,34)*(W<600?.9:1);this.kind=Math.random()<.18?'sink':Math.random()<.38?'patch':'crack';this.need=this.kind==='sink'?1.7:this.kind==='patch'?.85:1;this.fill=0;this.dead=false;this.wet=phases[phase]?.rain&&Math.random()<.65;this.seed=rand(0,99)}
+      update(dt){this.y+=(115+phase*22)*phases[phase].speed*dt;if(active===this){this.fill+=dt/this.need;if(this.fill>=1)this.finish()}if(this.y>H+70)this.dead=true}
+      finish(){this.dead=true;fixed++;streak=clamp(streak+.25,1,5);health=clamp(health+2,0,100);burst(this.x,this.y,'#dfff00');ping(520,.05);toast(this.kind==='sink'?'SINKHOLE SEALED +200':'PATCH HELD +100');if(this.kind==='patch'&&phase>0&&Math.random()<.35)setTimeout(()=>running&&holes.push(new Hole()),1600)}
+      draw(){const r=this.r*(1-this.fill*.55);ctx.save();ctx.translate(this.x,this.y);ctx.rotate(Math.sin(this.seed)*.12);ctx.shadowColor='#000';ctx.shadowBlur=16;ctx.fillStyle='#090a08';ctx.beginPath();for(let i=0;i<12;i++){const a=i/12*Math.PI*2,rr=r*(.82+.2*Math.sin(i*4.7+this.seed));ctx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr*.64)}ctx.closePath();ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle='#050604';ctx.lineWidth=3;ctx.stroke();if(this.wet){ctx.fillStyle='rgba(62,214,224,.28)';ctx.beginPath();ctx.ellipse(-r*.08,-r*.06,r*.62,r*.18,-.1,0,Math.PI*2);ctx.fill()}if(this.kind==='sink'){ctx.strokeStyle='#ff6b18';ctx.setLineDash([4,5]);ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,0,r*1.25,r*.85,0,0,Math.PI*2);ctx.stroke()}if(this.kind==='patch'){ctx.strokeStyle='#8e9087';ctx.lineWidth=2;for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(-r*.7+i*9,-r*.2);ctx.lineTo(-r*.2+i*5,r*.65);ctx.stroke()}}if(this.fill>0){ctx.fillStyle='#575a50';ctx.beginPath();ctx.ellipse(0,0,r*this.fill,r*.62*this.fill,0,0,Math.PI*2);ctx.fill()}ctx.strokeStyle='#dfff00';ctx.lineWidth=4;ctx.setLineDash([]);ctx.beginPath();ctx.arc(0,0,this.r+8,-Math.PI/2,-Math.PI/2+this.fill*Math.PI*2);ctx.stroke();ctx.restore()}
+      hit(x,y){return Math.hypot(x-this.x,(y-this.y)*1.35)<this.r+24}
+    }
+    class Car{
+      constructor(){this.lane=Math.floor(rand(0,3));if(phase===2&&this.lane===1)this.lane=Math.random()<.5?0:2;this.x=roadX+laneW*(this.lane+.5);this.y=H+70;this.speed=rand(130,190)*(1+phase*.12);this.type=Math.random()<.13?'ambulance':Math.random()<.35?'auto':Math.random()<.55?'bike':'car';this.dead=false;this.hit=false}
+      update(dt){this.y-=this.speed*dt;if(!this.hit)for(const h of holes){if(!h.dead&&h.lane===this.lane&&h.fill<.85&&Math.abs(this.y-h.y)<32+h.r*.4){this.hit=true;h.dead=true;const loss=this.type==='ambulance'?28:14;health=clamp(health-loss,0,100);streak=1;shake=10;burst(this.x,this.y,'#ff6b18');ping(95,.12);toast(this.type==='ambulance'?'PRIORITY VEHICLE HIT −28':'IMPACT −14');if(health<=0)finishRun();break}}if(this.y<-90)this.dead=true}
+      draw(){ctx.save();ctx.translate(this.x,this.y);if(this.hit)ctx.rotate(.28);const w=this.type==='bike'?14:this.type==='auto'?29:34,h=this.type==='bike'?38:52;ctx.fillStyle=this.type==='ambulance'?'#f2f0e8':this.type==='auto'?'#dfff00':['#3ed6e0','#ff6b18','#d8d2b7'][this.lane];ctx.fillRect(-w/2,-h/2,w,h);ctx.fillStyle='#11130f';ctx.fillRect(-w*.36,-h*.3,w*.72,h*.18);ctx.fillRect(-w*.36,h*.08,w*.72,h*.16);if(this.type==='ambulance'){ctx.fillStyle='#ff3b2f';ctx.fillRect(-3,-h*.45,6,10);ctx.fillRect(-8,-h*.4,16,4)}if(this.type==='auto'){ctx.fillStyle='#11130f';ctx.fillRect(-w/2,-h/2,w,9)}ctx.fillStyle='#070806';ctx.fillRect(-w/2-3,-h*.28,4,12);ctx.fillRect(w/2-1,-h*.28,4,12);ctx.fillRect(-w/2-3,h*.12,4,12);ctx.fillRect(w/2-1,h*.12,4,12);ctx.restore()}
+    }
+    function burst(x,y,c){for(let i=0;i<15;i++)bits.push({x,y,vx:rand(-100,100),vy:rand(-120,20),life:rand(.3,.8),c})}
+    function ping(f,d){if(!sound)return;try{const ac=ping.ac||(ping.ac=new AudioContext),o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;g.gain.setValueAtTime(.025,ac.currentTime);g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+d);o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+d)}catch(e){}}
+    function toast(s){$('#toast').textContent=s;$('#toast').classList.add('show');clearTimeout(toast.x);toast.x=setTimeout(()=>$('#toast').classList.remove('show'),850)}
+    function drawRoad(){ctx.fillStyle='#23251f';ctx.fillRect(0,0,W,H);ctx.fillStyle='#171914';ctx.fillRect(roadX-8,0,roadW+16,H);const g=ctx.createLinearGradient(roadX,0,roadX+roadW,0);g.addColorStop(0,'#30322c');g.addColorStop(.5,'#3b3d36');g.addColorStop(1,'#292b26');ctx.fillStyle=g;ctx.fillRect(roadX,0,roadW,H);ctx.strokeStyle='#d6d3c3';ctx.lineWidth=3;ctx.setLineDash([24,30]);ctx.lineDashOffset=t*90;for(let i=1;i<3;i++){ctx.beginPath();ctx.moveTo(roadX+laneW*i,0);ctx.lineTo(roadX+laneW*i,H);ctx.stroke()}ctx.setLineDash([]);ctx.fillStyle='#dfff00';ctx.fillRect(roadX-5,0,5,H);ctx.fillRect(roadX+roadW,0,5,H);if(phase===2){ctx.fillStyle='#ff6b18';for(let y=(t*110)%80-80;y<H;y+=80){ctx.fillRect(roadX+laneW+6,y,laneW-12,11)}}for(let i=0;i<45;i++){const x=roadX+(Math.sin(i*87.2)*.5+.5)*roadW,y=((i*73+t*28)%H);ctx.fillStyle='rgba(0,0,0,.11)';ctx.fillRect(x,y,rand(1,4),rand(1,4))}}
+    function drawRain(){const amount=phases[Math.max(0,phase)]?.rain||0;if(!amount)return;ctx.strokeStyle=`rgba(180,220,225,${.17*amount})`;ctx.lineWidth=1;for(let i=0;i<70*amount;i++){const x=(i*83.7+t*230)%W,y=(i*47+t*620)%H;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-7,y+18);ctx.stroke()}ctx.fillStyle=`rgba(20,42,45,${.13*amount})`;ctx.fillRect(roadX,0,roadW,H)}
+    function loop(now){const dt=Math.min((now-last)/1000,.04)||0;last=now;t+=running?dt:dt*.15;ctx.save();if(shake>0){ctx.translate(rand(-shake,shake),rand(-shake,shake));shake*=.85}drawRoad();if(running){const np=t<10?0:t<21?1:2;if(np!==phase)setPhase(np);if(t>32)finishRun();if(now>spawnAt){holes.push(new Hole);spawnAt=now+rand(1000,1650)/phases[phase].holes}if(now>vehicleAt){cars.push(new Car);vehicleAt=now+rand(650,1050)/phases[phase].speed}holes.forEach(x=>x.update(dt));cars.forEach(x=>x.update(dt));bits.forEach(x=>{x.x+=x.vx*dt;x.y+=x.vy*dt;x.vy+=190*dt;x.life-=dt});holes=holes.filter(x=>!x.dead);cars=cars.filter(x=>!x.dead);bits=bits.filter(x=>x.life>0);$('#health').textContent=Math.round(health)+'%';$('#fixed').textContent=String(fixed).padStart(2,'0');$('#streak').textContent='×'+streak.toFixed(1)}holes.forEach(x=>x.draw());cars.forEach(x=>x.draw());bits.forEach(x=>{ctx.globalAlpha=x.life;ctx.fillStyle=x.c;ctx.fillRect(x.x,x.y,4,4)});ctx.globalAlpha=1;drawRain();ctx.restore();requestAnimationFrame(loop)}requestAnimationFrame(loop);
+    function setPhase(n){phase=n;$('#scenarioTitle').textContent=phases[n].title;$('#scenarioCopy').textContent=phases[n].copy;$('#scenario').classList.add('show');setTimeout(()=>$('#scenario').classList.remove('show'),2500);ping(260+n*100,.08)}
+    function startRun(){running=true;t=0;health=100;fixed=0;streak=1;phase=-1;holes=[];cars=[];bits=[];spawnAt=performance.now()+500;vehicleAt=performance.now()+900;$('#startPanel').hidden=true;$('#resultPanel').hidden=true;$('#labPanel').hidden=true;$('#hud').hidden=false;$('#side').style.display='none'}
+    function finishRun(){if(!running)return;running=false;active=null;$('#hud').hidden=true;$('#labPanel').hidden=false;updateLab()}
+    function pos(e){const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
+    canvas.addEventListener('pointerdown',e=>{if(!running)return;const p=pos(e);active=[...holes].reverse().find(h=>h.hit(p.x,p.y))||null;if(active){canvas.setPointerCapture(e.pointerId);ping(350,.025)}});canvas.addEventListener('pointermove',e=>{if(!active)return;const p=pos(e);if(!active.hit(p.x,p.y))active=null});canvas.addEventListener('pointerup',()=>active=null);canvas.addEventListener('pointercancel',()=>active=null);
+    addEventListener('keydown',e=>{if(!running)return;const lane=Number(e.key)-1;if(lane>=0&&lane<3)active=holes.filter(h=>h.lane===lane).sort((a,b)=>b.y-a.y)[0]||null});addEventListener('keyup',()=>active=null);
+    const sliders=['mix','compact','drain'];function updateLab(){sliders.forEach(id=>$('#'+id+'Out').value=$('#'+id).value);const m=+$('#mix').value,c=+$('#compact').value,d=+$('#drain').value;const life=Math.max(1,Math.round((m*.32+c*.32+d*.46)/5.2-7));const cost=900+m*17+c*16+d*22;$('#life').textContent=life;$('#cost').textContent='₹'+cost.toLocaleString('en-IN');$('#verdict').textContent=life<5?'A photo-op patch. Water enters the base and the crack returns.':life<12?'A decent patch. The first heavy monsoon will expose the weakest layer.':'A durable repair: sound mix, full compaction, and water moved away from the road.';return life}sliders.forEach(id=>$('#'+id).addEventListener('input',updateLab));
+    $('#testMix').onclick=()=>{const life=updateLab();$('#labPanel').hidden=true;$('#resultPanel').hidden=false;$('#rFixed').textContent=fixed;$('#rHealth').textContent=Math.round(health)+'%';$('#rLife').textContent=life+' mo';$('#resultTitle').innerHTML=life>=12?'Road<br><span>resilient.</span>':life>=5?'Road<br><span>reopened.</span>':'Road<br><span>failed.</span>';$('#resultCopy').textContent=life>=12?'You treated the road as a system—not a surface. Material, compaction, and drainage worked together.':life>=5?'It looks fixed today. But the weakest layer decides when the pothole returns.':'The cheapest visible fix became the most expensive cycle. The road will need another tender after the next rain.'};
+    $('#share').onclick=async()=>{const text=`My Gaddha field report: ${fixed} potholes sealed, ${Math.round(health)}% road health. The real level is making the repair last.`;try{if(navigator.share)await navigator.share({title:'Gaddha field report',text});else{await navigator.clipboard.writeText(text);toast('FIELD REPORT COPIED')}}catch(e){}};
+    $('#again').onclick=startRun;$('#start').onclick=startRun;$('#startSide').onclick=startRun;$('#learnSide').onclick=()=>{$('#startPanel').hidden=false};$('#mute').onclick=()=>{sound=!sound;$('#mute').textContent=sound?'♪':'×';$('#mute').setAttribute('aria-label',sound?'Mute sound':'Turn sound on')};
+  </script>
+</body>
+</html>
