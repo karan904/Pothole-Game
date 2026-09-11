@@ -1,177 +1,92 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
-  <meta name="theme-color" content="#11130f" />
-  <meta name="description" content="A fast civic arcade game about fixing potholes—and why they keep coming back." />
-  <title>Gaddha — The road fights back</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#315c7d">
+  <meta name="description" content="Fill potholes before traffic reaches them in this illustrated Indian road game.">
+  <title>Gaddha — A Monsoon Road Story</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
-    :root{--ink:#11130f;--paper:#f2f0e8;--acid:#dfff00;--orange:#ff6b18;--blue:#3ed6e0;--muted:#a9aaa1;--line:rgba(242,240,232,.18)}
+    :root{--sky:#79b8cf;--indigo:#234c6b;--deep:#183849;--earth:#b9683e;--paper:#f4ead7;--ink:#2b2924;--red:#a83e32;--green:#4f7153;--gold:#d69a45}
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-    html,body{width:100%;height:100%;overflow:hidden;background:#090a08;color:var(--paper);font-family:Inter,system-ui,sans-serif}
-    button,input{font:inherit} button{cursor:pointer} [hidden]{display:none!important}
-    .shell{height:100%;display:grid;grid-template-columns:minmax(0,1fr) min(370px,31vw);background:var(--ink);position:relative}
-    .game{position:relative;min-width:0;overflow:hidden;background:#23251f}
-    canvas{display:block;width:100%;height:100%;touch-action:none}
-    .grain{position:absolute;inset:0;pointer-events:none;opacity:.12;mix-blend-mode:soft-light;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E")}
-    .topbar{position:absolute;z-index:4;top:0;left:0;right:0;padding:18px 20px;display:flex;align-items:flex-start;justify-content:space-between;pointer-events:none;background:linear-gradient(#11130fe8,transparent)}
-    .brand{font-family:'Archivo Black',Impact,sans-serif;font-size:clamp(22px,4vw,42px);line-height:.85;letter-spacing:-.055em;text-transform:uppercase;color:var(--acid)}
-    .brand small{display:block;font:600 10px/1.5 'IBM Plex Mono',monospace;letter-spacing:.15em;color:var(--paper);margin-top:7px}
-    .hud{display:flex;gap:8px;text-align:right}
-    .metric{min-width:76px;border-top:2px solid var(--paper);padding-top:7px}
-    .metric span{display:block;font:500 9px/1 'IBM Plex Mono',monospace;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
-    .metric strong{font:600 21px/1.25 'IBM Plex Mono',monospace;color:var(--paper)}
-    .scenario{position:absolute;z-index:5;top:100px;left:20px;max-width:310px;pointer-events:none;transform:translateX(-130%);transition:transform .35s cubic-bezier(.2,.8,.2,1)}
-    .scenario.show{transform:none}.scenario-card{background:var(--acid);color:var(--ink);padding:12px 15px;border-left:7px solid var(--orange);box-shadow:7px 7px 0 #11130f}
-    .scenario-card b{font-family:'Archivo Black',sans-serif;text-transform:uppercase;font-size:19px;display:block}.scenario-card span{font:500 11px/1.4 'IBM Plex Mono',monospace}
-    .ticker{position:absolute;z-index:4;left:0;right:0;bottom:0;background:var(--acid);color:var(--ink);height:32px;display:flex;align-items:center;overflow:hidden;border-top:2px solid var(--ink)}
-    .ticker span{white-space:nowrap;font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.08em;text-transform:uppercase;animation:ticker 24s linear infinite}
-    @keyframes ticker{to{transform:translateX(-50%)}}
-    .toast{position:absolute;z-index:6;left:50%;bottom:56px;transform:translate(-50%,20px);background:var(--paper);color:var(--ink);padding:9px 13px;font:600 11px 'IBM Plex Mono',monospace;opacity:0;transition:.2s;white-space:nowrap}.toast.show{opacity:1;transform:translate(-50%,0)}
-    .side{position:relative;border-left:1px solid var(--line);display:flex;flex-direction:column;background:#11130f;min-height:0}
-    .side-head{padding:24px 24px 18px;border-bottom:1px solid var(--line)}
-    .eyebrow{font:600 10px/1 'IBM Plex Mono',monospace;letter-spacing:.18em;text-transform:uppercase;color:var(--acid)}
-    .side h2{font:400 clamp(28px,3vw,48px)/.96 'Archivo Black',sans-serif;text-transform:uppercase;letter-spacing:-.04em;margin-top:10px}
-    .side h2 em{font-style:normal;color:var(--orange)}
-    .side-body{padding:20px 24px;display:flex;flex-direction:column;gap:18px;min-height:0;overflow:auto}
-    .brief{font-size:15px;line-height:1.55;color:#d1d0c8}.brief strong{color:var(--paper)}
-    .rule{height:1px;background:var(--line)}
-    .how{display:grid;gap:10px}.how-row{display:grid;grid-template-columns:35px 1fr;gap:11px;align-items:start}.how-num{font:600 12px 'IBM Plex Mono';color:var(--acid);border:1px solid var(--acid);width:30px;height:30px;display:grid;place-items:center}.how-row p{font-size:13px;line-height:1.35;color:#c1c2ba}.how-row b{display:block;color:var(--paper);font-size:13px;margin-bottom:2px}
-    .cta{margin-top:auto;display:grid;gap:9px}.primary,.secondary,.text-btn{border:0;text-transform:uppercase;font-weight:800;letter-spacing:.06em;min-height:52px;padding:0 18px}
-    .primary{background:var(--acid);color:var(--ink);box-shadow:5px 5px 0 var(--orange)}.primary:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--orange)}.primary:active{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--orange)}
-    .secondary{background:transparent;color:var(--paper);border:1px solid var(--line)}.secondary:hover{border-color:var(--acid);color:var(--acid)}
-    .micro{font:400 10px/1.5 'IBM Plex Mono',monospace;color:#85877e}
-    .panel{position:absolute;inset:0;z-index:10;background:#11130ff3;display:grid;place-items:center;padding:22px;overflow:auto}
-    .panel-inner{width:min(620px,100%);position:relative}.panel .kicker{font:600 11px 'IBM Plex Mono';color:var(--acid);letter-spacing:.16em;text-transform:uppercase;margin-bottom:13px}
-    .panel h1{font:400 clamp(42px,8vw,82px)/.83 'Archivo Black',sans-serif;letter-spacing:-.065em;text-transform:uppercase}.panel h1 span{color:var(--orange)}
-    .panel .lead{font-size:16px;line-height:1.5;color:#c9c9c1;max-width:480px;margin:22px 0}.panel-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center}.panel-actions .primary{min-width:210px}
-    .start-mark{position:absolute;right:0;top:-10px;width:80px;height:80px;border:1px solid var(--acid);border-radius:50%;display:grid;place-items:center;font:600 10px/1.2 'IBM Plex Mono';text-align:center;color:var(--acid);transform:rotate(9deg)}
-    .mode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);margin:24px 0}.mode{background:#171914;padding:14px 12px;min-height:100px}.mode small{font:500 9px 'IBM Plex Mono';color:var(--orange);letter-spacing:.1em}.mode b{font-size:13px;display:block;margin:7px 0 4px}.mode p{font-size:11px;line-height:1.35;color:#92948b}
-    .lab{width:min(700px,100%)}.lab-layout{display:grid;grid-template-columns:1fr 220px;gap:28px;margin:22px 0}.sliders{display:grid;gap:18px}.slider label{display:flex;justify-content:space-between;font:600 11px 'IBM Plex Mono';text-transform:uppercase;letter-spacing:.06em}.slider output{color:var(--acid)}input[type=range]{width:100%;margin-top:9px;accent-color:var(--acid)}
-    .receipt{background:var(--paper);color:var(--ink);padding:18px;transform:rotate(1deg);box-shadow:7px 7px 0 var(--orange)}.receipt small{font:600 9px 'IBM Plex Mono';letter-spacing:.12em}.receipt .years{font:400 50px/.9 'Archivo Black';margin:18px 0 4px}.receipt p{font:500 11px/1.5 'IBM Plex Mono'}.receipt hr{border:0;border-top:1px dashed #777;margin:14px 0}.receipt .cost{display:flex;justify-content:space-between;font:600 11px 'IBM Plex Mono'}
-    .result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);margin:20px 0}.result-grid div{background:#171914;padding:14px}.result-grid small{font:500 9px 'IBM Plex Mono';color:#92948b;text-transform:uppercase}.result-grid b{display:block;font:400 24px 'Archivo Black';margin-top:5px;color:var(--acid)}
-    .mute{position:absolute;z-index:7;right:16px;bottom:44px;border:1px solid var(--line);background:#11130fbb;color:var(--paper);width:38px;height:38px;font-size:16px}
-    @media(max-width:780px){.shell{display:block}.game{height:100%}.side{position:absolute;z-index:8;inset:0;background:transparent;border:0;pointer-events:none}.side-head{display:none}.side-body{padding:0;overflow:visible}.side .brief,.side .rule,.side .how,.side .micro{display:none}.side .cta{position:absolute;left:18px;right:18px;bottom:48px;pointer-events:auto}.side .cta .secondary{display:none}.side .cta .primary{width:100%}.topbar{padding:16px}.hud{gap:6px}.metric{min-width:58px}.metric strong{font-size:17px}.metric span{font-size:8px}.scenario{left:16px;top:84px}.ticker{height:28px}.panel{padding:18px}.panel-inner{padding-top:26px}.start-mark{width:62px;height:62px;font-size:8px}.mode-grid{grid-template-columns:1fr}.mode{min-height:0}.lab-layout{grid-template-columns:1fr}.receipt{transform:none}.result-grid{grid-template-columns:1fr 1fr}.panel h1{font-size:clamp(40px,14vw,68px)}}
-    @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+    html,body{width:100%;height:100%;overflow:hidden;background:var(--deep);color:var(--ink);font-family:Georgia,'Times New Roman',serif}
+    button{font:inherit;cursor:pointer}[hidden]{display:none!important}
+    .page{height:100%;display:grid;grid-template-columns:minmax(280px,1fr) minmax(360px,620px) minmax(280px,1fr);background:linear-gradient(#83bed1 0 42%,#ca8a5f 42% 100%);position:relative}
+    .page:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.12;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.45'/%3E%3C/svg%3E")}
+    .margin{position:relative;padding:clamp(28px,5vw,72px);display:flex;flex-direction:column;justify-content:space-between;z-index:2}.margin.left{align-items:flex-end;text-align:right}.margin.right{align-items:flex-start}
+    .name{font-size:clamp(42px,5vw,76px);line-height:.88;color:var(--paper);font-weight:normal;letter-spacing:-.055em;text-shadow:0 2px 0 rgba(35,76,107,.3)}.name span{display:block;font-size:.28em;letter-spacing:.08em;font-style:italic;margin-top:14px;color:#f4dfbd}
+    .note{max-width:230px;font-size:16px;line-height:1.55;color:#f7e9d4;text-wrap:balance}.note strong{display:block;font-weight:normal;font-style:italic;font-size:24px;line-height:1.05;margin-bottom:10px}
+    .legend{display:grid;gap:13px;color:#f6e9d6;font-size:14px;line-height:1.35}.legend div{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:center}.legend i{width:30px;height:30px;border:1px solid currentColor;border-radius:50%;display:grid;place-items:center;font-style:normal}
+    .game{position:relative;height:100%;min-height:0;overflow:hidden;background:#5a554d;box-shadow:0 0 50px rgba(24,56,73,.35);border-inline:1px solid rgba(244,234,215,.5);z-index:3}canvas{display:block;width:100%;height:100%;touch-action:none}
+    .wash{position:absolute;inset:0;pointer-events:none;mix-blend-mode:soft-light;opacity:.18;background-image:linear-gradient(103deg,transparent 0 35%,rgba(255,255,255,.15) 36%,transparent 39% 100%)}
+    .hud{position:absolute;z-index:5;top:0;left:0;right:0;padding:calc(15px + env(safe-area-inset-top)) 18px 30px;display:flex;justify-content:space-between;align-items:flex-start;color:var(--paper);background:linear-gradient(rgba(24,56,73,.88),transparent);pointer-events:none}.chapter{font-size:14px;font-style:italic;letter-spacing:.03em}.chapter b{display:block;font-size:20px;font-style:normal;font-weight:normal;margin-bottom:2px}
+    .score{display:flex;gap:18px;text-align:center}.score div{min-width:45px}.score small{display:block;font:11px/1.2 Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;opacity:.8}.score strong{font-size:24px;font-weight:normal}.lives{letter-spacing:2px;color:#f4c6b5}
+    .instruction{position:absolute;z-index:5;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);background:rgba(244,234,215,.94);color:var(--ink);padding:10px 15px;border-radius:2px;box-shadow:0 4px 0 rgba(43,41,36,.22);font-size:15px;white-space:nowrap;pointer-events:none;transition:opacity .4s}
+    .message{position:absolute;z-index:6;left:50%;top:25%;width:max-content;max-width:82%;transform:translate(-50%,12px) rotate(-1deg);background:var(--paper);color:var(--ink);padding:10px 18px;border-left:5px solid var(--red);font-size:17px;font-style:italic;box-shadow:4px 5px 0 rgba(43,41,36,.25);opacity:0;transition:.22s;pointer-events:none}.message.show{opacity:1;transform:translate(-50%,0) rotate(-1deg)}
+    .sound{position:absolute;z-index:7;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));width:40px;height:40px;border:1px solid rgba(244,234,215,.6);border-radius:50%;background:rgba(24,56,73,.65);color:var(--paper);font-size:16px}
+    .sheet{position:absolute;z-index:10;inset:0;display:grid;place-items:center;padding:28px;background:linear-gradient(rgba(40,77,98,.35),rgba(50,37,28,.55));backdrop-filter:blur(2px)}
+    .paper{position:relative;width:min(460px,100%);background:var(--paper);padding:clamp(28px,6vw,50px);box-shadow:10px 12px 0 rgba(72,49,37,.34);border:1px solid rgba(43,41,36,.3);transform:rotate(-.35deg)}.paper:before,.paper:after{content:"";position:absolute;left:14px;right:14px;height:5px;background:repeating-linear-gradient(90deg,var(--red) 0 16px,transparent 16px 23px,var(--indigo) 23px 39px,transparent 39px 46px)}.paper:before{top:13px}.paper:after{bottom:13px}
+    .kicker{font:12px/1.3 Arial,sans-serif;text-transform:uppercase;letter-spacing:.13em;color:var(--red);margin-bottom:14px}h1{font-size:clamp(51px,11vw,78px);line-height:.82;font-weight:normal;letter-spacing:-.06em;color:var(--indigo);margin-bottom:20px}h1 em{display:block;font-size:.34em;line-height:1.2;letter-spacing:.02em;color:var(--earth);margin-top:13px;font-weight:normal}.lead{font-size:18px;line-height:1.5;margin-bottom:24px}.lead strong{font-weight:normal;color:var(--red)}
+    .begin,.again,.share{width:100%;min-height:55px;border:0;padding:12px 20px;background:var(--indigo);color:var(--paper);font-size:17px;box-shadow:4px 4px 0 var(--earth);transition:.12s}.begin:hover,.again:hover{background:#1b405c}.begin:active,.again:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--earth)}.tip{margin-top:15px;text-align:center;font-size:13px;font-style:italic;color:#766b5e}
+    .report{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#b9a58c;border:1px solid #b9a58c;margin:24px 0}.report div{background:#f8efdf;padding:16px}.report small{font:11px Arial,sans-serif;text-transform:uppercase;letter-spacing:.08em;color:#7b6d5d}.report strong{display:block;font-size:31px;font-weight:normal;color:var(--indigo);margin-top:4px}.share{margin-top:10px;background:transparent;color:var(--indigo);border:1px solid var(--indigo);box-shadow:none}
+    @media(max-width:980px){.page{grid-template-columns:1fr minmax(340px,600px) 1fr}.margin{padding:24px}.margin .note,.legend{display:none}.name{font-size:34px}}
+    @media(max-width:720px){.page{display:block}.margin{display:none}.game{height:100%;width:100%;border:0}.paper{transform:none}.sheet{padding:18px}.sound{bottom:calc(66px + env(safe-area-inset-bottom))}.instruction{bottom:calc(18px + env(safe-area-inset-bottom))}}
+    @media(prefers-reduced-motion:reduce){*{transition:none!important}}
   </style>
 </head>
 <body>
-  <main class="shell">
-    <section class="game" aria-label="Gaddha game area">
-      <canvas id="road" aria-label="A three-lane road. Tap or click potholes to repair them before traffic arrives."></canvas>
-      <div class="grain"></div>
-      <header class="topbar">
-        <div class="brand">Gaddha<small>Ward 27 / night crew</small></div>
-        <div class="hud" id="hud" hidden>
-          <div class="metric"><span>Road</span><strong id="health">100%</strong></div>
-          <div class="metric"><span>Fixed</span><strong id="fixed">00</strong></div>
-          <div class="metric"><span>Streak</span><strong id="streak">×1</strong></div>
-        </div>
-      </header>
-      <div class="scenario" id="scenario"><div class="scenario-card"><b id="scenarioTitle">Rush hour</b><span id="scenarioCopy">Traffic density rising.</span></div></div>
-      <div class="toast" id="toast">PATCH HELD +100</div>
-      <button class="mute" id="mute" aria-label="Toggle sound">♪</button>
-      <div class="ticker" aria-hidden="true"><span> TAP + HOLD TO PATCH • CLEAR AMBULANCE LANES FIRST • CHEAP PATCHES RETURN • DRAINAGE IS INFRASTRUCTURE • TAP + HOLD TO PATCH • CLEAR AMBULANCE LANES FIRST • CHEAP PATCHES RETURN • DRAINAGE IS INFRASTRUCTURE • </span></div>
+  <main class="page">
+    <aside class="margin left" aria-hidden="true"><div class="name">Gaddha<span>a monsoon road story</span></div><p class="note"><strong>Every repair buys someone another safe journey.</strong>The road remembers whether you finished the job.</p></aside>
+    <section class="game" aria-label="Vertical scrolling pothole repair game">
+      <canvas id="road" aria-label="Hold a pothole to fill it before the approaching vehicle reaches it"></canvas><div class="wash"></div>
+      <header class="hud" id="hud" hidden><div class="chapter"><b id="weather">Late afternoon</b><span id="place">District road, Maharashtra</span></div><div class="score"><div><small>Saved</small><strong id="saved">0</strong></div><div><small>Road</small><strong id="roadHealth">100</strong></div><div><small>Lives</small><strong class="lives" id="lives">●●●</strong></div></div></header>
+      <div class="message" id="message">A family made it home.</div><div class="instruction" id="instruction">Press and hold the pothole to repair it</div><button class="sound" id="sound" aria-label="Mute sound">♪</button>
+      <section class="sheet" id="startSheet"><div class="paper"><p class="kicker">An illustrated road game</p><h1>Gaddha<em>The road is in your hands.</em></h1><p class="lead">Hold each pothole to fill and compact it before the approaching car arrives. <strong>Finish the repair. Save the journey.</strong></p><button class="begin" id="begin">Begin the drive</button><p class="tip">Touch, mouse, or keys 1–3</p></div></section>
+      <section class="sheet" id="endSheet" hidden><div class="paper"><p class="kicker" id="endKicker">The rain has passed</p><h1 id="endTitle">The road<br>remembers.</h1><div class="report"><div><small>Journeys saved</small><strong id="finalSaved">0</strong></div><div><small>Repairs finished</small><strong id="finalFixed">0</strong></div><div><small>Road health</small><strong id="finalHealth">0%</strong></div><div><small>Longest run</small><strong id="finalStreak">0</strong></div></div><p class="lead" id="endCopy">A careful repair is quiet. So is the journey that reaches home safely.</p><button class="again" id="again">Take the road again</button><button class="share" id="share">Share this road report</button></div></section>
     </section>
-
-    <aside class="side" id="side">
-      <div class="side-head"><div class="eyebrow">Public works // arcade</div><h2>The road<br><em>fights back.</em></h2></div>
-      <div class="side-body">
-        <p class="brief">Patching is easy. Building a road that <strong>survives the monsoon</strong> is the real level.</p>
-        <div class="rule"></div>
-        <div class="how">
-          <div class="how-row"><span class="how-num">01</span><p><b>Press and hold</b>Fill cracks before vehicles reach them.</p></div>
-          <div class="how-row"><span class="how-num">02</span><p><b>Read the road</b>Puddles hide damage. Sinkholes take longer.</p></div>
-          <div class="how-row"><span class="how-num">03</span><p><b>Protect priority traffic</b>An ambulance crash costs double.</p></div>
-        </div>
-        <div class="cta"><button class="primary" id="startSide">Start night shift →</button><button class="secondary" id="learnSide">How the campaign works</button></div>
-        <p class="micro">A short civic game. No account. Your run stays on this device.</p>
-      </div>
-    </aside>
-
-    <section class="panel" id="startPanel">
-      <div class="panel-inner">
-        <div class="start-mark">30 SEC<br>SHIFT</div>
-        <p class="kicker">Municipal repair simulator / 01</p>
-        <h1>Fix fast.<br><span>Fix right.</span></h1>
-        <p class="lead">Three city conditions. One road crew. Patch each gaddha before traffic hits—and find out whether your work survives the rain.</p>
-        <div class="mode-grid">
-          <div class="mode"><small>ACT I</small><b>Rush hour</b><p>Fast traffic, visible cracks.</p></div>
-          <div class="mode"><small>ACT II</small><b>Monsoon</b><p>Hidden damage and washouts.</p></div>
-          <div class="mode"><small>ACT III</small><b>VIP diversion</b><p>Lane closures, priority vehicles.</p></div>
-        </div>
-        <div class="panel-actions"><button class="primary" id="start">Start night shift →</button><span class="micro">Mouse, touch, or keys 1—3</span></div>
-      </div>
-    </section>
-
-    <section class="panel" id="labPanel" hidden>
-      <div class="panel-inner lab">
-        <p class="kicker">Repair lab / spend what matters</p>
-        <h1>Make it<br><span>last.</span></h1>
-        <div class="lab-layout">
-          <div class="sliders">
-            <div class="slider"><label for="mix">Bitumen mix <output id="mixOut">60</output></label><input id="mix" type="range" min="10" max="100" value="60"></div>
-            <div class="slider"><label for="compact">Compaction <output id="compactOut">60</output></label><input id="compact" type="range" min="10" max="100" value="60"></div>
-            <div class="slider"><label for="drain">Drainage <output id="drainOut">40</output></label><input id="drain" type="range" min="10" max="100" value="40"></div>
-          </div>
-          <div class="receipt"><small>WARD WORK ORDER</small><div class="years"><span id="life">7</span><small> MONTHS</small></div><p id="verdict">A decent patch. The first heavy monsoon will expose the weak drainage.</p><hr><div class="cost"><span>EST. COST</span><span id="cost">₹3,520</span></div></div>
-        </div>
-        <div class="panel-actions"><button class="primary" id="testMix">Test this repair →</button></div>
-      </div>
-    </section>
-
-    <section class="panel" id="resultPanel" hidden>
-      <div class="panel-inner">
-        <p class="kicker">Shift complete / field report</p>
-        <h1 id="resultTitle">Road<br><span>reopened.</span></h1>
-        <div class="result-grid"><div><small>Potholes sealed</small><b id="rFixed">0</b></div><div><small>Road health</small><b id="rHealth">0%</b></div><div><small>Repair life</small><b id="rLife">0 mo</b></div></div>
-        <p class="lead" id="resultCopy">A lasting road is a system: the right material, proper compaction, and somewhere for rainwater to go.</p>
-        <div class="panel-actions"><button class="primary" id="again">Run another shift →</button><button class="secondary" id="share">Share field report</button></div>
-      </div>
-    </section>
+    <aside class="margin right" aria-hidden="true"><div class="legend"><div><i>1</i><span>Find the broken road</span></div><div><i>2</i><span>Hold to fill and compact</span></div><div><i>3</i><span>Let the journey pass safely</span></div></div><p class="note"><strong>Watch the water.</strong>As the monsoon arrives, puddles conceal deeper damage and every repair takes longer.</p></aside>
   </main>
   <script>
     const canvas=document.querySelector('#road'),ctx=canvas.getContext('2d');
-    const $=s=>document.querySelector(s), rand=(a,b)=>Math.random()*(b-a)+a, clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-    let W=0,H=0,dpr=1,roadX=0,roadW=0,laneW=0,last=0,running=false,t=0,health=100,fixed=0,streak=1,spawnAt=0,vehicleAt=0,active=null,sound=true,phase=-1,shake=0;
-    let holes=[],cars=[],bits=[],marks=[];
-    const phases=[
-      {at:0,title:'ACT I — RUSH HOUR',copy:'Visible cracks. Traffic density rising.',rain:0,speed:1,holes:1},
-      {at:10,title:'ACT II — MONSOON',copy:'Puddles hide damage. Repairs wash out.',rain:1,speed:1.08,holes:1.25},
-      {at:21,title:'ACT III — VIP DIVERSION',copy:'One lane closed. Ambulances get priority.',rain:.45,speed:1.26,holes:1.5}
-    ];
-    function resize(){const r=canvas.getBoundingClientRect();dpr=Math.min(devicePixelRatio||1,2);W=r.width;H=r.height;canvas.width=W*dpr;canvas.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);roadW=Math.min(W*.76,560);roadX=(W-roadW)/2;laneW=roadW/3}
+    const $=s=>document.querySelector(s),rand=(a,b)=>Math.random()*(b-a)+a,clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+    let W=0,H=0,dpr=1,roadX=0,roadW=0,laneW=0,last=0,time=0,running=false;
+    let hazards=[],patches=[],particles=[],active=null,spawnAt=0,health=100,lives=3,saved=0,fixed=0,streak=0,bestStreak=0,shake=0,soundOn=true,firstRepair=true;
+    const colors={road:'#57554e',line:'#e8dcc4',earth:'#b9683e',earthDark:'#87482f',indigo:'#234c6b',paper:'#f4ead7',red:'#a83e32',green:'#4f7153',gold:'#d69a45',tar:'#34332f'};
+    function resize(){const r=canvas.getBoundingClientRect();dpr=Math.min(devicePixelRatio||1,2);W=r.width;H=r.height;canvas.width=W*dpr;canvas.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);roadW=Math.min(W*.78,500);roadX=(W-roadW)/2;laneW=roadW/3}
     addEventListener('resize',resize);resize();
-    class Hole{
-      constructor(){this.lane=Math.floor(rand(0,3));this.x=roadX+laneW*(this.lane+.5)+rand(-laneW*.15,laneW*.15);this.y=-60;this.r=rand(18,34)*(W<600?.9:1);this.kind=Math.random()<.18?'sink':Math.random()<.38?'patch':'crack';this.need=this.kind==='sink'?1.7:this.kind==='patch'?.85:1;this.fill=0;this.dead=false;this.wet=phases[phase]?.rain&&Math.random()<.65;this.seed=rand(0,99)}
-      update(dt){this.y+=(115+phase*22)*phases[phase].speed*dt;if(active===this){this.fill+=dt/this.need;if(this.fill>=1)this.finish()}if(this.y>H+70)this.dead=true}
-      finish(){this.dead=true;fixed++;streak=clamp(streak+.25,1,5);health=clamp(health+2,0,100);burst(this.x,this.y,'#dfff00');ping(520,.05);toast(this.kind==='sink'?'SINKHOLE SEALED +200':'PATCH HELD +100');if(this.kind==='patch'&&phase>0&&Math.random()<.35)setTimeout(()=>running&&holes.push(new Hole()),1600)}
-      draw(){const r=this.r*(1-this.fill*.55);ctx.save();ctx.translate(this.x,this.y);ctx.rotate(Math.sin(this.seed)*.12);ctx.shadowColor='#000';ctx.shadowBlur=16;ctx.fillStyle='#090a08';ctx.beginPath();for(let i=0;i<12;i++){const a=i/12*Math.PI*2,rr=r*(.82+.2*Math.sin(i*4.7+this.seed));ctx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr*.64)}ctx.closePath();ctx.fill();ctx.shadowBlur=0;ctx.strokeStyle='#050604';ctx.lineWidth=3;ctx.stroke();if(this.wet){ctx.fillStyle='rgba(62,214,224,.28)';ctx.beginPath();ctx.ellipse(-r*.08,-r*.06,r*.62,r*.18,-.1,0,Math.PI*2);ctx.fill()}if(this.kind==='sink'){ctx.strokeStyle='#ff6b18';ctx.setLineDash([4,5]);ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(0,0,r*1.25,r*.85,0,0,Math.PI*2);ctx.stroke()}if(this.kind==='patch'){ctx.strokeStyle='#8e9087';ctx.lineWidth=2;for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(-r*.7+i*9,-r*.2);ctx.lineTo(-r*.2+i*5,r*.65);ctx.stroke()}}if(this.fill>0){ctx.fillStyle='#575a50';ctx.beginPath();ctx.ellipse(0,0,r*this.fill,r*.62*this.fill,0,0,Math.PI*2);ctx.fill()}ctx.strokeStyle='#dfff00';ctx.lineWidth=4;ctx.setLineDash([]);ctx.beginPath();ctx.arc(0,0,this.r+8,-Math.PI/2,-Math.PI/2+this.fill*Math.PI*2);ctx.stroke();ctx.restore()}
-      hit(x,y){return Math.hypot(x-this.x,(y-this.y)*1.35)<this.r+24}
+    function irregularPath(x,y,rx,ry,seed=1,n=18){ctx.beginPath();for(let i=0;i<=n;i++){const a=i/n*Math.PI*2,noise=1+Math.sin(i*3.7+seed)*.09+Math.cos(i*5.1-seed)*.06,px=x+Math.cos(a)*rx*noise,py=y+Math.sin(a)*ry*noise;i?ctx.lineTo(px,py):ctx.moveTo(px,py)}ctx.closePath()}
+    function inkLine(x1,y1,x2,y2,color,width=1){ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(x1,y1);ctx.quadraticCurveTo((x1+x2)/2+Math.sin(y1*.1)*2,(y1+y2)/2,x2,y2);ctx.stroke()}
+    class Hazard{
+      constructor(){this.lane=Math.floor(rand(0,3));this.x=roadX+laneW*(this.lane+.5)+rand(-laneW*.08,laneW*.08);this.y=-70;this.r=rand(25,37);this.seed=rand(1,30);this.fill=0;this.dead=false;this.hit=false;this.wet=time>18;this.need=this.wet?1.15:rand(.72,.96);this.car=new Car(this)}
+      update(dt){const scroll=74+time*.7;this.y+=scroll*dt;this.car.update(dt,scroll);if(active===this&&!this.dead){const previous=this.fill;this.fill=clamp(this.fill+dt/this.need,0,1);if(Math.floor(previous*18)!==Math.floor(this.fill*18))repairSpeck(this);if(previous<.36&&this.fill>=.36)tone(185,.045,'triangle');if(previous<.78&&this.fill>=.78)tone(125,.06,'square');if(this.fill>=1)this.complete()}if(this.y>H+80&&!this.dead)this.dead=true}
+      complete(){this.fill=1;this.dead=true;active=null;fixed++;streak++;bestStreak=Math.max(bestStreak,streak);patches.push({x:this.x,y:this.y,rx:this.r*.98,ry:this.r*.62,life:5,seed:this.seed});burst(this.x,this.y,colors.earthDark,18);tone(310,.09,'sine');navigator.vibrate?.(24);if(firstRepair){showMessage('Gravel. Bitumen. Compacted.',1300);firstRepair=false}}
+      collide(){if(this.hit||this.fill>=1)return;this.hit=true;this.dead=true;active=null;lives--;health=clamp(health-28,0,100);streak=0;shake=13;burst(this.x,this.y,colors.red,28);tone(72,.22,'sawtooth');navigator.vibrate?.([70,40,90]);showMessage(lives?'The road struck back.':'Too many journeys were put at risk.',1300);if(lives<=0)setTimeout(endGame,650)}
+      draw(){if(this.dead&&this.fill<1)return;const p=this.fill;ctx.save();ctx.fillStyle='rgba(37,31,27,.28)';irregularPath(this.x+3,this.y+5,this.r*1.13,this.r*.72,this.seed);ctx.fill();ctx.fillStyle='#282722';irregularPath(this.x,this.y,this.r,this.r*.64,this.seed);ctx.fill();ctx.strokeStyle='#201f1b';ctx.lineWidth=2.2;ctx.stroke();for(let i=0;i<5;i++){const a=(i/5)*Math.PI*2+this.seed;inkLine(this.x+Math.cos(a)*this.r*.75,this.y+Math.sin(a)*this.r*.43,this.x+Math.cos(a)*this.r*1.38,this.y+Math.sin(a)*this.r*.86,'#393832',1.3)}if(this.wet){ctx.fillStyle='rgba(100,164,184,.43)';irregularPath(this.x-2,this.y-4,this.r*.72,this.r*.25,this.seed+3);ctx.fill();ctx.strokeStyle='rgba(232,220,196,.35)';ctx.lineWidth=1;ctx.stroke()}
+        if(p>0){if(p<.42){ctx.fillStyle=colors.earthDark;for(let i=0;i<18*p/.42;i++){const a=i*2.399+this.seed,rr=(i%7)/7*this.r*.72;ctx.beginPath();ctx.ellipse(this.x+Math.cos(a)*rr,this.y+Math.sin(a)*rr*.55,rand(2,4),rand(1.5,3),a,0,Math.PI*2);ctx.fill()}}if(p>.3){const tar=clamp((p-.3)/.5,0,1);ctx.fillStyle=colors.tar;irregularPath(this.x,this.y,this.r*.9*tar,this.r*.56*tar,this.seed+7);ctx.fill();ctx.strokeStyle='#292824';ctx.lineWidth=1.5;ctx.stroke()}if(p>.75){const compact=clamp((p-.75)/.25,0,1);ctx.fillStyle=`rgba(244,234,215,${.22*(1-compact)})`;irregularPath(this.x,this.y,this.r*(1.05-.08*compact),this.r*(.66-.05*compact),this.seed+2);ctx.fill();ctx.strokeStyle=colors.paper;ctx.globalAlpha=.75*(1-compact);ctx.lineWidth=3;ctx.stroke();ctx.globalAlpha=1}}
+        if(active===this){ctx.strokeStyle=colors.gold;ctx.lineWidth=4;ctx.lineCap='round';ctx.beginPath();ctx.arc(this.x,this.y,this.r+10,-Math.PI/2,-Math.PI/2+p*Math.PI*2);ctx.stroke();ctx.font='italic 13px Georgia';ctx.textAlign='center';ctx.fillStyle=colors.paper;ctx.fillText(p<.36?'aggregate':p<.78?'bitumen':'compact',this.x,this.y-this.r-17)}ctx.restore()}
+      contains(x,y){return Math.hypot(x-this.x,(y-this.y)*1.35)<this.r+25}
     }
     class Car{
-      constructor(){this.lane=Math.floor(rand(0,3));if(phase===2&&this.lane===1)this.lane=Math.random()<.5?0:2;this.x=roadX+laneW*(this.lane+.5);this.y=H+70;this.speed=rand(130,190)*(1+phase*.12);this.type=Math.random()<.13?'ambulance':Math.random()<.35?'auto':Math.random()<.55?'bike':'car';this.dead=false;this.hit=false}
-      update(dt){this.y-=this.speed*dt;if(!this.hit)for(const h of holes){if(!h.dead&&h.lane===this.lane&&h.fill<.85&&Math.abs(this.y-h.y)<32+h.r*.4){this.hit=true;h.dead=true;const loss=this.type==='ambulance'?28:14;health=clamp(health-loss,0,100);streak=1;shake=10;burst(this.x,this.y,'#ff6b18');ping(95,.12);toast(this.type==='ambulance'?'PRIORITY VEHICLE HIT −28':'IMPACT −14');if(health<=0)finishRun();break}}if(this.y<-90)this.dead=true}
-      draw(){ctx.save();ctx.translate(this.x,this.y);if(this.hit)ctx.rotate(.28);const w=this.type==='bike'?14:this.type==='auto'?29:34,h=this.type==='bike'?38:52;ctx.fillStyle=this.type==='ambulance'?'#f2f0e8':this.type==='auto'?'#dfff00':['#3ed6e0','#ff6b18','#d8d2b7'][this.lane];ctx.fillRect(-w/2,-h/2,w,h);ctx.fillStyle='#11130f';ctx.fillRect(-w*.36,-h*.3,w*.72,h*.18);ctx.fillRect(-w*.36,h*.08,w*.72,h*.16);if(this.type==='ambulance'){ctx.fillStyle='#ff3b2f';ctx.fillRect(-3,-h*.45,6,10);ctx.fillRect(-8,-h*.4,16,4)}if(this.type==='auto'){ctx.fillStyle='#11130f';ctx.fillRect(-w/2,-h/2,w,9)}ctx.fillStyle='#070806';ctx.fillRect(-w/2-3,-h*.28,4,12);ctx.fillRect(w/2-1,-h*.28,4,12);ctx.fillRect(-w/2-3,h*.12,4,12);ctx.fillRect(w/2-1,h*.12,4,12);ctx.restore()}
+      constructor(hazard){this.hazard=hazard;this.lane=hazard.lane;this.x=hazard.x;this.y=hazard.y-rand(180,245);this.speed=rand(117,139);this.type=Math.random()<.18?'auto':Math.random()<.28?'bike':Math.random()<.12?'ambulance':'car';this.color=this.type==='ambulance'?colors.paper:[colors.indigo,colors.red,colors.green,colors.gold][Math.floor(rand(0,4))];this.hit=false;this.passed=false;this.bob=rand(0,10)}
+      update(dt,scroll){if(this.hit){this.y+=(scroll*.6)*dt;return}this.y+=this.speed*dt;const h=this.hazard;if(!h.dead&&this.y>=h.y-h.r*.35){this.hit=true;h.collide()}else if(h.fill>=1&&!this.passed&&this.y>=h.y+34){this.passed=true;saved++;health=clamp(health+4,0,100);showMessage(this.type==='ambulance'?'An ambulance passed safely.':this.type==='auto'?'A driver made it through.':'A family made it home.',900);tone(440,.07,'sine')}}
+      draw(){if(this.y<-90||this.y>H+90)return;const y=this.y+(this.hit?Math.sin(time*24)*5:Math.sin(time*5+this.bob)*1.2);ctx.save();ctx.translate(this.x,y);if(this.hit)ctx.rotate(.22);let w=34,h=62;if(this.type==='auto'){w=32;h=49}else if(this.type==='bike'){w=15;h=47}else if(this.type==='ambulance'){w=37;h=67}ctx.fillStyle='rgba(28,27,23,.25)';ctx.beginPath();ctx.ellipse(4,5,w*.7,h*.52,0,0,Math.PI*2);ctx.fill();ctx.fillStyle=this.color;ctx.strokeStyle='#282722';ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,this.type==='auto'?10:6);ctx.fill();ctx.stroke();if(this.type==='bike'){ctx.fillStyle='#282722';ctx.beginPath();ctx.arc(0,-12,7,0,Math.PI*2);ctx.fill();ctx.fillStyle='#b9683e';ctx.beginPath();ctx.arc(0,-19,4,0,Math.PI*2);ctx.fill()}else{ctx.fillStyle='#9fc5cf';ctx.strokeStyle='#282722';ctx.lineWidth=1;ctx.beginPath();ctx.roundRect(-w*.34,-h*.27,w*.68,h*.23,3);ctx.fill();ctx.stroke();ctx.beginPath();ctx.roundRect(-w*.34,h*.06,w*.68,h*.18,3);ctx.fill();ctx.stroke();ctx.fillStyle='#7f4c37';ctx.beginPath();ctx.arc(0,-h*.08,4.5,0,Math.PI*2);ctx.fill()}if(this.type==='auto'){ctx.fillStyle='#2f3b31';ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,13,6);ctx.fill();ctx.strokeStyle=colors.gold;ctx.lineWidth=2;ctx.stroke()}if(this.type==='ambulance'){ctx.fillStyle=colors.red;ctx.fillRect(-3,-h*.43,6,16);ctx.fillRect(-9,-h*.36,18,5)}ctx.fillStyle='#24231f';ctx.fillRect(-w/2-3,-h*.3,5,15);ctx.fillRect(w/2-2,-h*.3,5,15);ctx.fillRect(-w/2-3,h*.12,5,15);ctx.fillRect(w/2-2,h*.12,5,15);ctx.restore()}
     }
-    function burst(x,y,c){for(let i=0;i<15;i++)bits.push({x,y,vx:rand(-100,100),vy:rand(-120,20),life:rand(.3,.8),c})}
-    function ping(f,d){if(!sound)return;try{const ac=ping.ac||(ping.ac=new AudioContext),o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;g.gain.setValueAtTime(.025,ac.currentTime);g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+d);o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+d)}catch(e){}}
-    function toast(s){$('#toast').textContent=s;$('#toast').classList.add('show');clearTimeout(toast.x);toast.x=setTimeout(()=>$('#toast').classList.remove('show'),850)}
-    function drawRoad(){ctx.fillStyle='#23251f';ctx.fillRect(0,0,W,H);ctx.fillStyle='#171914';ctx.fillRect(roadX-8,0,roadW+16,H);const g=ctx.createLinearGradient(roadX,0,roadX+roadW,0);g.addColorStop(0,'#30322c');g.addColorStop(.5,'#3b3d36');g.addColorStop(1,'#292b26');ctx.fillStyle=g;ctx.fillRect(roadX,0,roadW,H);ctx.strokeStyle='#d6d3c3';ctx.lineWidth=3;ctx.setLineDash([24,30]);ctx.lineDashOffset=t*90;for(let i=1;i<3;i++){ctx.beginPath();ctx.moveTo(roadX+laneW*i,0);ctx.lineTo(roadX+laneW*i,H);ctx.stroke()}ctx.setLineDash([]);ctx.fillStyle='#dfff00';ctx.fillRect(roadX-5,0,5,H);ctx.fillRect(roadX+roadW,0,5,H);if(phase===2){ctx.fillStyle='#ff6b18';for(let y=(t*110)%80-80;y<H;y+=80){ctx.fillRect(roadX+laneW+6,y,laneW-12,11)}}for(let i=0;i<45;i++){const x=roadX+(Math.sin(i*87.2)*.5+.5)*roadW,y=((i*73+t*28)%H);ctx.fillStyle='rgba(0,0,0,.11)';ctx.fillRect(x,y,rand(1,4),rand(1,4))}}
-    function drawRain(){const amount=phases[Math.max(0,phase)]?.rain||0;if(!amount)return;ctx.strokeStyle=`rgba(180,220,225,${.17*amount})`;ctx.lineWidth=1;for(let i=0;i<70*amount;i++){const x=(i*83.7+t*230)%W,y=(i*47+t*620)%H;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-7,y+18);ctx.stroke()}ctx.fillStyle=`rgba(20,42,45,${.13*amount})`;ctx.fillRect(roadX,0,roadW,H)}
-    function loop(now){const dt=Math.min((now-last)/1000,.04)||0;last=now;t+=running?dt:dt*.15;ctx.save();if(shake>0){ctx.translate(rand(-shake,shake),rand(-shake,shake));shake*=.85}drawRoad();if(running){const np=t<10?0:t<21?1:2;if(np!==phase)setPhase(np);if(t>32)finishRun();if(now>spawnAt){holes.push(new Hole);spawnAt=now+rand(1000,1650)/phases[phase].holes}if(now>vehicleAt){cars.push(new Car);vehicleAt=now+rand(650,1050)/phases[phase].speed}holes.forEach(x=>x.update(dt));cars.forEach(x=>x.update(dt));bits.forEach(x=>{x.x+=x.vx*dt;x.y+=x.vy*dt;x.vy+=190*dt;x.life-=dt});holes=holes.filter(x=>!x.dead);cars=cars.filter(x=>!x.dead);bits=bits.filter(x=>x.life>0);$('#health').textContent=Math.round(health)+'%';$('#fixed').textContent=String(fixed).padStart(2,'0');$('#streak').textContent='×'+streak.toFixed(1)}holes.forEach(x=>x.draw());cars.forEach(x=>x.draw());bits.forEach(x=>{ctx.globalAlpha=x.life;ctx.fillStyle=x.c;ctx.fillRect(x.x,x.y,4,4)});ctx.globalAlpha=1;drawRain();ctx.restore();requestAnimationFrame(loop)}requestAnimationFrame(loop);
-    function setPhase(n){phase=n;$('#scenarioTitle').textContent=phases[n].title;$('#scenarioCopy').textContent=phases[n].copy;$('#scenario').classList.add('show');setTimeout(()=>$('#scenario').classList.remove('show'),2500);ping(260+n*100,.08)}
-    function startRun(){running=true;t=0;health=100;fixed=0;streak=1;phase=-1;holes=[];cars=[];bits=[];spawnAt=performance.now()+500;vehicleAt=performance.now()+900;$('#startPanel').hidden=true;$('#resultPanel').hidden=true;$('#labPanel').hidden=true;$('#hud').hidden=false;$('#side').style.display='none'}
-    function finishRun(){if(!running)return;running=false;active=null;$('#hud').hidden=true;$('#labPanel').hidden=false;updateLab()}
-    function pos(e){const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
-    canvas.addEventListener('pointerdown',e=>{if(!running)return;const p=pos(e);active=[...holes].reverse().find(h=>h.hit(p.x,p.y))||null;if(active){canvas.setPointerCapture(e.pointerId);ping(350,.025)}});canvas.addEventListener('pointermove',e=>{if(!active)return;const p=pos(e);if(!active.hit(p.x,p.y))active=null});canvas.addEventListener('pointerup',()=>active=null);canvas.addEventListener('pointercancel',()=>active=null);
-    addEventListener('keydown',e=>{if(!running)return;const lane=Number(e.key)-1;if(lane>=0&&lane<3)active=holes.filter(h=>h.lane===lane).sort((a,b)=>b.y-a.y)[0]||null});addEventListener('keyup',()=>active=null);
-    const sliders=['mix','compact','drain'];function updateLab(){sliders.forEach(id=>$('#'+id+'Out').value=$('#'+id).value);const m=+$('#mix').value,c=+$('#compact').value,d=+$('#drain').value;const life=Math.max(1,Math.round((m*.32+c*.32+d*.46)/5.2-7));const cost=900+m*17+c*16+d*22;$('#life').textContent=life;$('#cost').textContent='₹'+cost.toLocaleString('en-IN');$('#verdict').textContent=life<5?'A photo-op patch. Water enters the base and the crack returns.':life<12?'A decent patch. The first heavy monsoon will expose the weakest layer.':'A durable repair: sound mix, full compaction, and water moved away from the road.';return life}sliders.forEach(id=>$('#'+id).addEventListener('input',updateLab));
-    $('#testMix').onclick=()=>{const life=updateLab();$('#labPanel').hidden=true;$('#resultPanel').hidden=false;$('#rFixed').textContent=fixed;$('#rHealth').textContent=Math.round(health)+'%';$('#rLife').textContent=life+' mo';$('#resultTitle').innerHTML=life>=12?'Road<br><span>resilient.</span>':life>=5?'Road<br><span>reopened.</span>':'Road<br><span>failed.</span>';$('#resultCopy').textContent=life>=12?'You treated the road as a system—not a surface. Material, compaction, and drainage worked together.':life>=5?'It looks fixed today. But the weakest layer decides when the pothole returns.':'The cheapest visible fix became the most expensive cycle. The road will need another tender after the next rain.'};
-    $('#share').onclick=async()=>{const text=`My Gaddha field report: ${fixed} potholes sealed, ${Math.round(health)}% road health. The real level is making the repair last.`;try{if(navigator.share)await navigator.share({title:'Gaddha field report',text});else{await navigator.clipboard.writeText(text);toast('FIELD REPORT COPIED')}}catch(e){}};
-    $('#again').onclick=startRun;$('#start').onclick=startRun;$('#startSide').onclick=startRun;$('#learnSide').onclick=()=>{$('#startPanel').hidden=false};$('#mute').onclick=()=>{sound=!sound;$('#mute').textContent=sound?'♪':'×';$('#mute').setAttribute('aria-label',sound?'Mute sound':'Turn sound on')};
+    function repairSpeck(h){const p=h.fill,a=rand(0,Math.PI*2),rr=rand(0,h.r*.72);particles.push({x:h.x+Math.cos(a)*rr,y:h.y+Math.sin(a)*rr*.55,vx:rand(-24,24),vy:rand(-28,-5),life:.35,size:rand(1.5,3.5),c:p<.4?colors.earthDark:colors.tar})}
+    function burst(x,y,c,n){for(let i=0;i<n;i++)particles.push({x,y,vx:rand(-110,110),vy:rand(-120,60),life:rand(.35,.8),size:rand(2,5),c})}
+    function tone(freq,duration,type){if(!soundOn)return;try{const ac=tone.ac||(tone.ac=new AudioContext),o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(freq,ac.currentTime);g.gain.setValueAtTime(.025,ac.currentTime);g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+duration);o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+duration)}catch(e){}}
+    function showMessage(text,duration=900){$('#message').textContent=text;$('#message').classList.add('show');clearTimeout(showMessage.timer);showMessage.timer=setTimeout(()=>$('#message').classList.remove('show'),duration)}
+    function drawGround(scroll){ctx.fillStyle=colors.earth;ctx.fillRect(0,0,W,H);for(let i=0;i<18;i++){const y=(i*93+scroll*.45)%H,x=i%2?roadX-34:roadX+roadW+34;ctx.strokeStyle='rgba(81,62,42,.23)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(x,y,18+(i%4)*4,0,Math.PI*2);ctx.stroke();for(let j=0;j<5;j++)inkLine(x,y,x+Math.cos(j*1.25)*22,y+Math.sin(j*1.25)*22,'rgba(54,75,49,.42)',1)}ctx.fillStyle='#d29a68';ctx.fillRect(roadX-14,0,roadW+28,H);ctx.strokeStyle='#724534';ctx.lineWidth=1;for(let y=(scroll%42)-42;y<H;y+=42){inkLine(roadX-13,y,roadX-4,y+8,'rgba(73,50,37,.4)');inkLine(roadX+roadW+4,y+8,roadX+roadW+13,y,'rgba(73,50,37,.4)')}}
+    function drawRoad(scroll){ctx.fillStyle=colors.road;ctx.fillRect(roadX,0,roadW,H);const g=ctx.createLinearGradient(roadX,0,roadX+roadW,0);g.addColorStop(0,'rgba(30,29,26,.18)');g.addColorStop(.14,'transparent');g.addColorStop(.84,'transparent');g.addColorStop(1,'rgba(30,29,26,.2)');ctx.fillStyle=g;ctx.fillRect(roadX,0,roadW,H);ctx.strokeStyle=colors.line;ctx.lineWidth=2;ctx.setLineDash([22,30]);ctx.lineDashOffset=scroll;for(let i=1;i<3;i++){ctx.beginPath();ctx.moveTo(roadX+laneW*i,0);ctx.lineTo(roadX+laneW*i,H);ctx.stroke()}ctx.setLineDash([]);ctx.strokeStyle='#373632';ctx.lineWidth=2;ctx.strokeRect(roadX,0,roadW,H);for(let i=0;i<54;i++){const x=roadX+((Math.sin(i*47.12)*.5+.5)*roadW),y=(i*67+scroll*.22)%H;ctx.fillStyle='rgba(32,31,28,.13)';ctx.fillRect(x,y,1+(i%3),1+(i%2))}}
+    function drawRain(){if(time<18)return;const strength=clamp((time-18)/9,0,1);ctx.fillStyle=`rgba(35,76,107,${.09*strength})`;ctx.fillRect(0,0,W,H);ctx.strokeStyle=`rgba(230,240,235,${.24*strength})`;ctx.lineWidth=1;for(let i=0;i<60;i++){const x=(i*79+time*210)%W,y=(i*51+time*510)%H;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-6,y+16);ctx.stroke()}}
+    function updateParticles(dt){particles.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=120*dt;p.life-=dt});particles=particles.filter(p=>p.life>0)}
+    function updateHud(){$('#saved').textContent=saved;$('#roadHealth').textContent=Math.round(health);$('#lives').textContent='●'.repeat(lives)+'○'.repeat(3-lives);if(time>27){$('#weather').textContent='Monsoon rain';$('#place').textContent='Visibility is falling'}else if(time>18){$('#weather').textContent='The sky opens';$('#place').textContent='Water hides the damage'}else if(time>9){$('#weather').textContent='Evening traffic';$('#place').textContent='The road grows busier'}}
+    function loop(now){const dt=Math.min((now-last)/1000,.04)||0;last=now;if(running)time+=dt;const scroll=time*(74+time*.35);ctx.save();if(shake>.2){ctx.translate(rand(-shake,shake),rand(-shake,shake));shake*=.84}drawGround(scroll);drawRoad(scroll);patches.forEach(p=>{p.y+=(74+time*.7)*dt;p.life-=dt;ctx.fillStyle='#3c3b36';irregularPath(p.x,p.y,p.rx,p.ry,p.seed);ctx.fill();ctx.strokeStyle='rgba(232,220,196,.22)';ctx.lineWidth=1;ctx.stroke()});patches=patches.filter(p=>p.y<H+70&&p.life>0);if(running){if(now>spawnAt){hazards.push(new Hazard);spawnAt=now+Math.max(850,rand(1450,2100)-time*20)}hazards.forEach(h=>h.update(dt));hazards=hazards.filter(h=>!h.dead||h.car.y<H+90);updateParticles(dt);updateHud();if(time>42)endGame()}hazards.forEach(h=>{h.draw();h.car.draw()});particles.forEach(p=>{ctx.globalAlpha=clamp(p.life*2,0,1);ctx.fillStyle=p.c;ctx.beginPath();ctx.ellipse(p.x,p.y,p.size,p.size*.7,0,0,Math.PI*2);ctx.fill()});ctx.globalAlpha=1;drawRain();ctx.restore();requestAnimationFrame(loop)}requestAnimationFrame(loop);
+    function startGame(){running=true;time=0;health=100;lives=3;saved=0;fixed=0;streak=0;bestStreak=0;hazards=[];patches=[];particles=[];active=null;firstRepair=true;spawnAt=performance.now()+350;$('#startSheet').hidden=true;$('#endSheet').hidden=true;$('#hud').hidden=false;$('#instruction').style.opacity=1;$('#weather').textContent='Late afternoon';$('#place').textContent='District road, Maharashtra';setTimeout(()=>{$('#instruction').style.opacity=.25},4500);tone(220,.08,'sine')}
+    function endGame(){if(!running)return;running=false;active=null;$('#hud').hidden=true;$('#instruction').style.opacity=0;$('#finalSaved').textContent=saved;$('#finalFixed').textContent=fixed;$('#finalHealth').textContent=Math.round(health)+'%';$('#finalStreak').textContent=bestStreak;$('#endKicker').textContent=lives?'The rain has passed':'The road is closed';$('#endTitle').innerHTML=health>65?'The road<br>remembers.':health>30?'Some made it<br>home.':'The road<br>gave way.';$('#endCopy').textContent=health>65?'A careful repair is quiet. So is the journey that reaches home safely.':health>30?'You held the road together, but every unfinished repair carried a human cost.':'Speed was not enough. The road needed attention before the traffic arrived.';$('#endSheet').hidden=false}
+    function pointer(e){const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
+    canvas.addEventListener('pointerdown',e=>{if(!running)return;const p=pointer(e);active=[...hazards].reverse().find(h=>!h.dead&&h.contains(p.x,p.y))||null;if(active){canvas.setPointerCapture(e.pointerId);tone(145,.035,'triangle')}});canvas.addEventListener('pointermove',e=>{if(!active)return;const p=pointer(e);if(!active.contains(p.x,p.y))active=null});canvas.addEventListener('pointerup',()=>active=null);canvas.addEventListener('pointercancel',()=>active=null);
+    addEventListener('keydown',e=>{if(!running)return;const lane=Number(e.key)-1;if(lane>=0&&lane<3)active=hazards.filter(h=>!h.dead&&h.lane===lane).sort((a,b)=>b.y-a.y)[0]||null});addEventListener('keyup',()=>active=null);
+    $('#begin').onclick=startGame;$('#again').onclick=startGame;$('#sound').onclick=()=>{soundOn=!soundOn;$('#sound').textContent=soundOn?'♪':'×';$('#sound').setAttribute('aria-label',soundOn?'Mute sound':'Turn sound on')};$('#share').onclick=async()=>{const text=`My Gaddha road report: ${saved} journeys saved and ${fixed} potholes repaired. A careful repair is quiet. So is the journey that reaches home safely.`;try{if(navigator.share)await navigator.share({title:'Gaddha — road report',text});else{await navigator.clipboard.writeText(text);showMessage('Road report copied.',1200)}}catch(e){}}
   </script>
 </body>
 </html>
