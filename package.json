@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "mkdir -p dist && cp index.html dist/index.html"
+    "build": "mkdir -p dist && cp index.html dist/index.html",
+    "preview": "npm run build && python3 -m http.server 4173 --directory dist"
   }
 }
