@@ -14,7 +14,7 @@ Then run the local preview and play at least one full round before proposing cha
 
 > Continue the Gaddha game in this repository. Read `README.md` and `DESIGN.md` completely before touching the code, then inspect and play `index.html`.
 >
-> The current version is a first interaction prototype, not an approved final design. Preserve its core loop: a simple vertical-scrolling road where the player presses and holds a pothole to fill it before an approaching vehicle reaches it. The vehicle must visibly gain on the hazard so the stakes are immediately legible.
+> The current version is a first interaction prototype, not an approved final design. Preserve its core loop: a simple vertical-scrolling road where the player rubs back and forth over a pothole to fill it before an approaching vehicle reaches it. The vehicle must visibly gain on the hazard so the stakes are immediately legible.
 >
 > The approved direction is “illustrated Indian civic realism”: a playable Indian newspaper cartoon with the warmth and moral sincerity of *Swades*. The visual balance is 70% warm cinematic observation, 20% editorial illustration, and 10% classical Indian compositional influence.
 >
@@ -34,10 +34,14 @@ Improve one full encounter:
 
 1. A pothole enters the road.
 2. Its threatened vehicle becomes visually associated with it.
-3. The player notices and holds the pothole.
+3. The player notices and rubs the pothole.
 4. Aggregate, bitumen, and compaction feel materially different.
 5. The vehicle either passes smoothly or strikes the incomplete repair.
 6. The result is readable without explanatory UI.
 
 Do not add metagame systems until this encounter feels satisfying.
 
+
+## Latest continuation point — 2026-09-15
+
+The mobile rubbing pass is implemented; see README.md for the changed behavior and verification. Primary target is iPhone/Safari. Next work should be guided by Karan's physical playtest, especially gesture effort and emotional clarity. Do not assume Chrome viewport testing proves Safari, touch, sound, or haptic behavior. Continue refining the artwork after the core encounter feels right.
