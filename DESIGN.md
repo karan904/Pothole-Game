@@ -67,3 +67,7 @@ Karan's feedback: the game lacked a memorable identity, urgency, and reward. Pri
 Use material displacement, friction-like sound, and a clear completion response as the baseline. Vibration is an optional enhancement, not a requirement. Keep a stationary hold alternative available for players who cannot comfortably rub.
 
 Show cars and motorcycles as distinct road users. Motorcycle crashes can lead to a non-graphic loss or injury screen. State that the encounter is fictional and keep cited real-world figures separate from game rules. Do not present every pothole collision as fatal, invent a real victim, or imply that all reported pothole deaths were motorcyclists. Emphasize the human loss and the responsibility to maintain safe roads.
+
+## Traffic and sound direction — 2026-09-23
+
+Trucks can cross potholes in the game; cars and bikes require protection. Use a larger cargo-body silhouette and a low, multi-tone horn so trucks are recognizable. Background music should be interrupted by approaching horns, then recover, creating contrast between the road's calm and traffic urgency. Keep all essential danger cues visible for muted play.

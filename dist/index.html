@@ -43,7 +43,7 @@
       <canvas id="road" aria-label="Rub back and forth over a pothole to repair it before traffic arrives. Hold keys 1, 2 or 3 for each lane."></canvas><div class="wash"></div>
       <header class="hud" id="hud" hidden><div class="chapter"><b id="weather">Late afternoon</b><span id="place">District road, Maharashtra</span></div><div class="score"><div><small>Saved</small><strong id="saved">0</strong></div><div><small>Road</small><strong id="roadHealth">100</strong></div><span id="lives" hidden></span></div></header>
       <div class="message" id="message" role="status" aria-live="polite">A family made it home.</div><div class="instruction" id="instruction">Rub back and forth to fix the road</div><button class="sound" id="sound" aria-label="Mute sound" aria-pressed="true">♪</button><button class="pause" id="pause" aria-label="Pause game" hidden>Ⅱ</button><button class="haptic" id="haptic" aria-pressed="true" hidden>Vibration on</button><section class="sheet" id="pauseSheet" hidden><div class="paper"><p class="kicker">Take a breath</p><h1>Road<br>paused.</h1><button class="begin" id="resume">Continue</button></div></section>
-      <section class="sheet" id="startSheet"><div class="paper"><p class="kicker">An illustrated road game</p><h1>Gaddha<em>The road is in your hands.</em></h1><p class="lead">A rider is coming. There is broken road ahead.<br><strong>Rub the pothole back and forth. Get them through safely.</strong></p><button class="begin" id="begin">Take care of this road</button><label class="assist"><input id="assist" type="checkbox"> Hold to repair instead of rubbing</label><p class="tip">Sound adds texture. Headphones welcome.<br>Keyboard: hold 1, 2 or 3.</p><p class="content-note">Contains non-graphic depictions of road injury and loss.</p></div></section>
+      <section class="sheet" id="startSheet"><div class="paper"><p class="kicker">An illustrated road game</p><h1>Gaddha<em>The road is in your hands.</em></h1><p class="lead">A rider is coming. There is broken road ahead.<br><strong>Rub the pothole back and forth. Get them through safely.</strong></p><button class="begin" id="begin">Take care of this road</button><label class="assist"><input id="assist" type="checkbox"> Hold to repair instead of rubbing</label><p class="tip">Music, horns, and the sound of repair.<br>Keyboard: hold 1, 2 or 3.<br>Trucks can roll through. Protect cars and bikes.</p><p class="content-note">Contains non-graphic depictions of road injury and loss.</p></div></section>
       <section class="sheet" id="endSheet" hidden><div class="paper"><p class="kicker" id="endKicker">The rain has passed</p><h1 id="endTitle">The road<br>remembers.</h1><div class="report"><div><small>Journeys saved</small><strong id="finalSaved">0</strong></div><div><small>Repairs finished</small><strong id="finalFixed">0</strong></div><div><small>Road health</small><strong id="finalHealth">0%</strong></div><div><small>Longest run</small><strong id="finalStreak">0</strong></div></div><p class="lead" id="endCopy">A careful repair is quiet. So is the journey that reaches home safely.</p><div id="humanCost" class="human-cost" hidden><p id="outcomeNote"></p><p><strong>2,161 people</strong> were killed in accidents classified under potholes in India in 2023. Each death leaves people who have to live with the loss.</p><a href="https://morth.gov.in/backend/documents/uploaded/Road-Accident-in-India-2023-Publications.pdf#page=65" target="_blank" rel="noopener">Source: MoRTH, 2023 · Table 3.5</a><p class="source-note">The encounter is fictional. The statistic is reported data, not a model of the chance of dying in a crash. Safe road maintenance is a public responsibility.</p></div><button class="again" id="again">Take the road again</button><button class="share" id="share">Share this road report</button></div></section>
     </section>
     <aside class="margin right" aria-hidden="true"><div class="legend"><div><i>1</i><span>Find the broken road</span></div><div><i>2</i><span>Rub to fill and compact</span></div><div><i>3</i><span>Let the journey pass safely</span></div></div><p class="note"><strong>Watch the water.</strong>As the monsoon arrives, puddles conceal deeper damage and every repair takes longer.</p></aside>
@@ -63,36 +63,60 @@
     class Hazard{
       constructor(){this.lane=Math.floor(rand(0,3));this.x=roadX+laneW*(this.lane+.5)+rand(-laneW*.08,laneW*.08);this.y=H*.30;this.r=Math.min(laneW*.39,38);this.seed=rand(1,30);this.fill=0;this.dead=false;this.hit=false;this.wet=time>18;this.need=this.wet?1.35:1.05;this.strokes=[];this.car=new Car(this)}
       update(dt){const scroll=74+time*.7;this.y+=scroll*dt;this.car.update(dt,scroll);if(active===this&&!this.dead){const previous=this.fill;const assisted=$('#assist').checked||keyboardLane!==null;const effort=assisted?dt:Math.min(rubBudget,dt*1.8);rubBudget=Math.max(0,rubBudget-effort);this.fill=clamp(this.fill+effort/this.need,0,1);if(Math.floor(previous*18)!==Math.floor(this.fill*18))repairSpeck(this);if(previous<.36&&this.fill>=.36){tone(185,.07,'triangle');pulse(12)}if(previous<.78&&this.fill>=.78){tone(125,.08,'triangle');pulse([12,25,12])}if(this.fill>=1)this.complete()}if(this.y>H+80&&!this.dead)this.dead=true}
-      complete(){this.fill=1;this.dead=true;active=null;fixed++;streak++;bestStreak=Math.max(bestStreak,streak);patches.push({x:this.x,y:this.y,rx:this.r*.98,ry:this.r*.62,life:5,seed:this.seed});burst(this.x,this.y,colors.earthDark,18);tone(310,.09,'sine');pulse([15,35,25]);if(firstRepair){showMessage(this.car.type==='bike'?'Repaired. Watch the rider pass.':'Repaired. Watch the car pass.',1100);firstRepair=false}}
+      complete(){this.fill=1;this.dead=true;active=null;fixed++;streak++;bestStreak=Math.max(bestStreak,streak);patches.push({x:this.x,y:this.y,rx:this.r*.98,ry:this.r*.62,life:5,seed:this.seed});burst(this.x,this.y,colors.earthDark,18);tone(310,.09,'sine');pulse([15,35,25]);if(firstRepair){showMessage(this.car.type==='bike'?'Repaired. Watch the rider pass.':this.car.type==='truck'?'Road repaired.':'Repaired. Watch the car pass.',1100);firstRepair=false}}
       collide(){
-        if(this.hit||this.fill>=1)return;
+        if(this.car.type==='truck'||this.hit||this.fill>=1)return;
         this.hit=true;this.dead=true;if(active===this)releaseRepair();lives--;health=clamp(health-28,0,100);streak=0;shake=reducedMotion?0:9;
         burst(this.x,this.y,colors.earthDark,16);tone(72,.18,'triangle');pulse([45,30,60]);
         if(this.car.type==='bike'){
-          bikeOutcome=this.fill<.36?'fatal':'injured';paused=true;
+          bikeOutcome=this.fill<.36?'fatal':'injured';paused=true;soundscape.silence();
           $('#instruction').style.opacity=0;$('#message').classList.remove('show');
           impactTimer=setTimeout(()=>{endGame()},900);
         }else{showMessage('A damaged wheel. A journey interrupted.',1500);if(lives<=0)impactTimer=setTimeout(endGame,650)}
       }
       draw(){if(this.dead&&this.fill<1)return;const p=this.fill;ctx.save();ctx.fillStyle='rgba(37,31,27,.28)';irregularPath(this.x+3,this.y+5,this.r*1.13,this.r*.72,this.seed);ctx.fill();ctx.fillStyle='#282722';irregularPath(this.x,this.y,this.r,this.r*.64,this.seed);ctx.fill();ctx.strokeStyle='#201f1b';ctx.lineWidth=2.2;ctx.stroke();for(let i=0;i<5;i++){const a=(i/5)*Math.PI*2+this.seed;inkLine(this.x+Math.cos(a)*this.r*.75,this.y+Math.sin(a)*this.r*.43,this.x+Math.cos(a)*this.r*1.38,this.y+Math.sin(a)*this.r*.86,'#393832',1.3)}if(this.wet){ctx.fillStyle='rgba(100,164,184,.43)';irregularPath(this.x-2,this.y-4,this.r*.72,this.r*.25,this.seed+3);ctx.fill();ctx.strokeStyle='rgba(232,220,196,.35)';ctx.lineWidth=1;ctx.stroke()}
         if(p>0){if(p<.42){ctx.fillStyle=colors.earthDark;for(let i=0;i<18*p/.42;i++){const a=i*2.399+this.seed,rr=(i%7)/7*this.r*.72;ctx.beginPath();ctx.ellipse(this.x+Math.cos(a)*rr,this.y+Math.sin(a)*rr*.55,rand(2,4),rand(1.5,3),a,0,Math.PI*2);ctx.fill()}}if(p>.3){const tar=clamp((p-.3)/.5,0,1);ctx.fillStyle=colors.tar;irregularPath(this.x,this.y,this.r*.9*tar,this.r*.56*tar,this.seed+7);ctx.fill();ctx.strokeStyle='#292824';ctx.lineWidth=1.5;ctx.stroke()}if(p>.75){const compact=clamp((p-.75)/.25,0,1);ctx.fillStyle=`rgba(244,234,215,${.22*(1-compact)})`;irregularPath(this.x,this.y,this.r*(1.05-.08*compact),this.r*(.66-.05*compact),this.seed+2);ctx.fill();ctx.strokeStyle=colors.paper;ctx.globalAlpha=.75*(1-compact);ctx.lineWidth=3;ctx.stroke();ctx.globalAlpha=1}}
-        if(!this.dead){const gap=this.y-this.car.y;const urgent=gap<125;ctx.font='600 12px Arial';ctx.textAlign='center';ctx.fillStyle=urgent?'#f9c5a7':colors.paper;const seconds=Math.max(0,(gap-this.r*.35)/Math.max(12,this.car.speed-(74+time*.7)));const label=active===this?(p<.36?'Rub gravel in':p<.78?'Spread the bitumen':'Smooth it flat'):(this.car.type==='bike'?'Rider · ':'Car · ')+seconds.toFixed(1)+'s';ctx.fillText(label,this.x,this.y-this.r-26);const barW=this.r*1.7;ctx.fillStyle='#282722';ctx.fillRect(this.x-barW/2,this.y-this.r-17,barW,5);ctx.fillStyle=active===this?colors.gold:urgent?'#ed9b78':colors.paper;ctx.fillRect(this.x-barW/2,this.y-this.r-17,barW*(active===this?p:clamp(gap/240,0,1)),5);
+        if(!this.dead){const gap=this.y-this.car.y;const urgent=this.car.type!=='truck'&&!this.car.passed&&gap<125;ctx.font='600 12px Arial';ctx.textAlign='center';ctx.fillStyle=urgent?'#f9c5a7':colors.paper;const seconds=Math.max(0,(gap-this.r*.35)/Math.max(12,this.car.speed-(74+time*.7)));const label=active===this?(p<.36?'Rub gravel in':p<.78?'Spread the bitumen':'Smooth it flat'):this.car.type==='truck'?(this.car.passed?'Broken road':'Truck · sturdy'):(this.car.type==='bike'?'Rider · ':'Car · ')+seconds.toFixed(1)+'s';ctx.fillText(label,this.x,this.y-this.r-26);const barW=this.r*1.7;ctx.fillStyle='#282722';ctx.fillRect(this.x-barW/2,this.y-this.r-17,barW,5);ctx.fillStyle=active===this?colors.gold:urgent?'#ed9b78':colors.paper;ctx.fillRect(this.x-barW/2,this.y-this.r-17,barW*(active===this?p:clamp(gap/240,0,1)),5);
           if(active===this){ctx.save();irregularPath(this.x,this.y,this.r*.94,this.r*.6,this.seed);ctx.clip();this.strokes.forEach(s=>{ctx.strokeStyle=s.p<.36?'#bc855a':s.p<.78?'#232622':'#888779';ctx.lineWidth=s.p<.36?5:s.p<.78?10:3;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(this.x+s.x1,this.y+s.y1);ctx.lineTo(this.x+s.x2,this.y+s.y2);ctx.stroke()});ctx.restore()}
         }ctx.restore()}
       contains(x,y){return Math.hypot(x-this.x,(y-this.y)*1.35)<this.r+25}
     }
     class Car{
-      constructor(hazard){this.hazard=hazard;this.lane=hazard.lane;this.x=hazard.x;this.y=hazard.y-rand(180,245);this.speed=rand(117,125);this.type=encounter++%3===1?'car':'bike';this.color=this.type==='ambulance'?colors.paper:[colors.indigo,colors.red,colors.green,colors.gold][Math.floor(rand(0,4))];this.hit=false;this.passed=false;this.bob=rand(0,10)}
-      update(dt,scroll){if(this.hit){this.y+=(scroll*.6)*dt;return}this.y+=this.speed*dt;const h=this.hazard;if(!h.dead&&this.y>=h.y-h.r*.35){this.hit=true;h.collide()}else if(h.fill>=1&&!this.passed&&this.y>=h.y+34){this.passed=true;saved++;health=clamp(health+4,0,100);showMessage(this.type==='bike'?'The rider is safely through.':'The car is safely through.',1500);tone(440,.12,'sine');setTimeout(()=>tone(554,.12,'sine'),100);pulse([12,40,12]);this.relief=1}}
-      draw(){if(this.y<-90||this.y>H+90)return;const y=this.y+(this.hit?Math.sin(time*24)*5:Math.sin(time*5+this.bob)*1.2);ctx.save();ctx.translate(this.x,y);if(this.hit)ctx.rotate(this.type==='bike'?1.05:.22);let w=34,h=62;if(this.type==='auto'){w=32;h=49}else if(this.type==='bike'){w=15;h=47}else if(this.type==='ambulance'){w=37;h=67}ctx.fillStyle='rgba(28,27,23,.25)';ctx.beginPath();ctx.ellipse(4,5,w*.7,h*.52,0,0,Math.PI*2);ctx.fill();if(this.type==='bike'){drawBike(this);ctx.restore();return}ctx.fillStyle=this.color;ctx.strokeStyle='#282722';ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,this.type==='auto'?10:6);ctx.fill();ctx.stroke();if(this.type==='bike'){ctx.fillStyle='#282722';ctx.beginPath();ctx.arc(0,-12,7,0,Math.PI*2);ctx.fill();ctx.fillStyle='#b9683e';ctx.beginPath();ctx.arc(0,-19,4,0,Math.PI*2);ctx.fill()}else{ctx.fillStyle='#9fc5cf';ctx.strokeStyle='#282722';ctx.lineWidth=1;ctx.beginPath();ctx.roundRect(-w*.34,-h*.27,w*.68,h*.23,3);ctx.fill();ctx.stroke();ctx.beginPath();ctx.roundRect(-w*.34,h*.06,w*.68,h*.18,3);ctx.fill();ctx.stroke();ctx.fillStyle='#7f4c37';ctx.beginPath();ctx.arc(0,-h*.08,4.5,0,Math.PI*2);ctx.fill()}if(this.type==='auto'){ctx.fillStyle='#2f3b31';ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,13,6);ctx.fill();ctx.strokeStyle=colors.gold;ctx.lineWidth=2;ctx.stroke()}if(this.type==='ambulance'){ctx.fillStyle=colors.red;ctx.fillRect(-3,-h*.43,6,16);ctx.fillRect(-9,-h*.36,18,5)}ctx.fillStyle='#24231f';ctx.fillRect(-w/2-3,-h*.3,5,15);ctx.fillRect(w/2-2,-h*.3,5,15);ctx.fillRect(-w/2-3,h*.12,5,15);ctx.fillRect(w/2-2,h*.12,5,15);ctx.restore()}
+      constructor(hazard){this.hazard=hazard;this.lane=hazard.lane;this.x=hazard.x;this.y=hazard.y-rand(180,245);this.speed=rand(117,125);this.type=['bike','truck','car','bike'][encounter++%4];this.hornAt=time+.4;this.bounce=0;this.color=this.type==='ambulance'?colors.paper:[colors.indigo,colors.red,colors.green,colors.gold][Math.floor(rand(0,4))];this.hit=false;this.passed=false;this.bob=rand(0,10)}
+      update(dt,scroll){
+        this.bounce=Math.max(0,this.bounce-dt);
+        if(this.hit){this.y+=(scroll*.6)*dt;return}
+        this.y+=this.speed*dt;const h=this.hazard,gap=h.y-this.y;
+        if(!this.passed&&this.y>25&&this.y<H&&time>=this.hornAt&&(this.type==='truck'||(!h.dead&&gap<190))){
+          soundscape.horn(this.type);this.hornAt=time+(this.type==='truck'?3.5:gap<95?1.05:2.2);
+        }
+        if(this.type==='truck'){
+          if(!this.passed&&this.y>=h.y-h.r*.35){
+            this.passed=true;if(h.fill<1){this.bounce=.45;tone(65,.17,'triangle');showMessage('The truck rolls through. Save repairs for cars and bikes.',1700)}
+          }
+          return;
+        }
+        if(!this.passed&&!h.dead&&this.y>=h.y-h.r*.35){this.hit=true;h.collide()}
+        else if(h.fill>=1&&!this.passed&&this.y>=h.y+34){this.passed=true;saved++;health=clamp(health+4,0,100);showMessage(this.type==='bike'?'The rider is safely through.':'The car is safely through.',1500);tone(440,.12,'sine');soundscape.note(554,.16,'sine',.04,.1);pulse([12,40,12]);this.relief=1}
+      }
+      draw(){if(this.y<-90||this.y>H+90)return;const y=this.y+(this.hit?Math.sin(time*24)*5:Math.sin(time*5+this.bob)*1.2);ctx.save();ctx.translate(this.x,y);if(this.type==='truck'){if(!reducedMotion)ctx.translate(0,Math.sin(this.bounce*35)*this.bounce*7);drawTruck(this);ctx.restore();return}if(this.hit)ctx.rotate(this.type==='bike'?1.05:.22);let w=34,h=62;if(this.type==='auto'){w=32;h=49}else if(this.type==='bike'){w=15;h=47}else if(this.type==='ambulance'){w=37;h=67}ctx.fillStyle='rgba(28,27,23,.25)';ctx.beginPath();ctx.ellipse(4,5,w*.7,h*.52,0,0,Math.PI*2);ctx.fill();if(this.type==='bike'){drawBike(this);ctx.restore();return}ctx.fillStyle=this.color;ctx.strokeStyle='#282722';ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,this.type==='auto'?10:6);ctx.fill();ctx.stroke();if(this.type==='bike'){ctx.fillStyle='#282722';ctx.beginPath();ctx.arc(0,-12,7,0,Math.PI*2);ctx.fill();ctx.fillStyle='#b9683e';ctx.beginPath();ctx.arc(0,-19,4,0,Math.PI*2);ctx.fill()}else{ctx.fillStyle='#9fc5cf';ctx.strokeStyle='#282722';ctx.lineWidth=1;ctx.beginPath();ctx.roundRect(-w*.34,-h*.27,w*.68,h*.23,3);ctx.fill();ctx.stroke();ctx.beginPath();ctx.roundRect(-w*.34,h*.06,w*.68,h*.18,3);ctx.fill();ctx.stroke();ctx.fillStyle='#7f4c37';ctx.beginPath();ctx.arc(0,-h*.08,4.5,0,Math.PI*2);ctx.fill()}if(this.type==='auto'){ctx.fillStyle='#2f3b31';ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,13,6);ctx.fill();ctx.strokeStyle=colors.gold;ctx.lineWidth=2;ctx.stroke()}if(this.type==='ambulance'){ctx.fillStyle=colors.red;ctx.fillRect(-3,-h*.43,6,16);ctx.fillRect(-9,-h*.36,18,5)}ctx.fillStyle='#24231f';ctx.fillRect(-w/2-3,-h*.3,5,15);ctx.fillRect(w/2-2,-h*.3,5,15);ctx.fillRect(-w/2-3,h*.12,5,15);ctx.fillRect(w/2-2,h*.12,5,15);ctx.restore()}
     }
     function drawApproach(h){
       const c=h.car;if(c.hit||c.passed||c.y<-50)return;
-      ctx.save();const danger=!h.dead&&h.y-c.y<125;
+      ctx.save();const danger=c.type!=='truck'&&!h.dead&&h.y-c.y<125;
       ctx.globalAlpha=h.fill>=1?.22:danger?.26:.12;
       ctx.fillStyle=h.fill>=1?'#bdcba0':danger?'#eab08c':'#f4ead7';
       ctx.beginPath();ctx.moveTo(c.x-7,c.y+25);ctx.lineTo(h.x-h.r*.8,h.y);ctx.lineTo(h.x+h.r*.8,h.y);ctx.lineTo(c.x+7,c.y+25);ctx.closePath();ctx.fill();ctx.restore();
-      if(danger&&running&&!paused&&time>warningAt){tone(210,.045,'sine');warningAt=time+Math.max(.22,(h.y-c.y)/220)}
+
+    }
+    function drawTruck(car){
+      ctx.fillStyle='rgba(25,26,21,.3)';ctx.fillRect(-24,-46,52,100);
+      ctx.fillStyle='#252822';for(const y of [-29,-13,28]){ctx.fillRect(-27,y,8,16);ctx.fillRect(19,y,8,16)}
+      ctx.lineWidth=2;ctx.strokeStyle='#342f25';ctx.fillStyle='#b2693f';ctx.beginPath();ctx.roundRect(-22,-46,44,64,3);ctx.fill();ctx.stroke();
+      ctx.fillStyle='#557765';ctx.fillRect(-18,-41,36,51);for(let y=-37;y<12;y+=9)inkLine(-17,y,17,y,'#9daa85',1.5);
+      ctx.fillStyle=colors.gold;ctx.beginPath();ctx.roundRect(-23,17,46,32,5);ctx.fill();ctx.stroke();ctx.fillStyle='#294959';ctx.fillRect(-17,31,34,10);
+      ctx.fillStyle=colors.paper;ctx.fillRect(-20,44,7,4);ctx.fillRect(13,44,7,4);ctx.fillStyle='#723e2f';ctx.fillRect(-14,20,28,4);
+      ctx.strokeStyle=colors.paper;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(-18,-21);ctx.lineTo(0,-33);ctx.lineTo(18,-21);ctx.stroke();
     }
     function drawBike(car){
       ctx.fillStyle='#252822';ctx.strokeStyle='#161d1b';ctx.lineWidth=2;
@@ -108,7 +132,62 @@
     function releaseRepair(){active=null;pointerId=null;lastPointer=null;rubBudget=0;keyboardLane=null}
     function repairSpeck(h){const p=h.fill,a=rand(0,Math.PI*2),rr=rand(0,h.r*.72);particles.push({x:h.x+Math.cos(a)*rr,y:h.y+Math.sin(a)*rr*.55,vx:rand(-24,24),vy:rand(-28,-5),life:.35,size:rand(1.5,3.5),c:p<.4?colors.earthDark:colors.tar})}
     function burst(x,y,c,n){for(let i=0;i<n;i++)particles.push({x,y,vx:rand(-110,110),vy:rand(-120,60),life:rand(.35,.8),size:rand(2,5),c})}
-    function tone(freq,duration,type){if(!soundOn)return;try{const ac=tone.ac||(tone.ac=new AudioContext),o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(freq,ac.currentTime);g.gain.setValueAtTime(.025,ac.currentTime);g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+duration);o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+duration)}catch(e){}}
+    // Original procedural score and vehicle voices. No third-party recordings.
+    const soundscape={ac:null,master:null,music:null,effects:null,voices:new Set(),nextBeat:0,beat:0,duckUntil:0,
+      unlock(){
+        if(!soundOn)return;
+        try{
+          if(!this.ac){
+            const Audio=globalThis.AudioContext||globalThis.webkitAudioContext;if(!Audio)return;
+            this.ac=new Audio();this.master=this.ac.createGain();this.music=this.ac.createGain();this.effects=this.ac.createGain();
+            this.master.gain.value=.55;this.music.gain.value=.7;this.effects.gain.value=.8;
+            this.music.connect(this.master);this.effects.connect(this.master);this.master.connect(this.ac.destination);
+          }
+          this.ac.resume().catch(()=>{});this.master.gain.setTargetAtTime(.55,this.ac.currentTime,.02);if(this.nextBeat<this.ac.currentTime-.5)this.nextBeat=this.ac.currentTime;
+        }catch(e){/* Gameplay remains available without browser audio. */}
+      },
+      note(freq,duration=.2,type='sine',level=.04,delay=0,bus='effects',slide=1){
+        if(!soundOn||!running||paused||!this.ac||this.ac.state!=='running')return;
+        const ac=this.ac,t=ac.currentTime+delay,o=ac.createOscillator(),g=ac.createGain(),filter=ac.createBiquadFilter();
+        o.type=type;o.frequency.setValueAtTime(freq*.985,t);o.frequency.linearRampToValueAtTime(freq,t+.025);o.frequency.linearRampToValueAtTime(freq*slide,t+duration);
+        filter.type='lowpass';filter.frequency.value=bus==='music'?1800:2400;filter.Q.value=.5;
+        g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(level,t+.015);g.gain.exponentialRampToValueAtTime(.0001,t+duration);
+        o.connect(filter).connect(g).connect(this[bus]);this.voices.add(o);
+        o.onended=()=>{o.disconnect();filter.disconnect();g.disconnect();this.voices.delete(o)};o.start(t);o.stop(t+duration+.02);
+      },
+      grit(stage){
+        if(!soundOn||!running||paused||!this.ac||this.ac.state!=='running')return;
+        const ac=this.ac,t=ac.currentTime,d=.06,b=ac.createBuffer(1,Math.ceil(ac.sampleRate*d),ac.sampleRate),data=b.getChannelData(0);
+        for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*(1-i/data.length);
+        const n=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();n.buffer=b;f.type='lowpass';f.frequency.value=stage<.36?1700:stage<.78?450:850;g.gain.value=.055;
+        n.connect(f).connect(g).connect(this.effects);this.voices.add(n);n.onended=()=>{n.disconnect();f.disconnect();g.disconnect();this.voices.delete(n)};n.start(t);n.stop(t+d);
+      },
+      horn(type){
+        if(!soundOn||!running||paused||!this.ac||this.ac.state!=='running')return;
+        const truck=type==='truck',car=type==='car';
+        const phrases=truck?[[0,146.83,185,.27],[.32,164.81,207.65,.38]]:car?[[0,349.23,440,.17],[.23,349.23,440,.15]]:[[0,659.25,0,.11],[.19,659.25,0,.09]];
+        for(const [delay,low,high,duration] of phrases){this.note(low,duration,truck?'sawtooth':'square',truck?.045:.025,delay,'effects',.975);if(high)this.note(high,duration,'sawtooth',.027,delay,'effects',.98)}
+        this.duckUntil=Math.max(this.duckUntil,this.ac.currentTime+(truck?.95:.65));this.music.gain.setTargetAtTime(.12,this.ac.currentTime,.025);
+      },
+      tick(){
+        if(!soundOn||!running||paused||!this.ac||this.ac.state!=='running')return;
+        const t=this.ac.currentTime;this.music.gain.setTargetAtTime(t<this.duckUntil?.12:.7,t,.18);
+        if(t<this.nextBeat)return;if(t-this.nextBeat>.5)this.nextBeat=t;
+        // A light, repeating pentatonic melody, low drone and soft pulse.
+        const melody=[293.66,369.99,440,369.99,329.63,293.66,246.94,329.63,293.66,440,493.88,440,369.99,329.63,293.66,0],n=this.beat%16;
+        if(melody[n]){this.note(melody[n],.32,'triangle',.055,0,'music');this.note(melody[n]*2,.12,'sine',.012,0,'music')}
+        if(n%4===0)this.note(n<8?146.83:123.47,1.05,'sine',.055,0,'music');
+        this.note(n%2?110:73.42,.075,'sine',.035,0,'music',.65);this.beat++;this.nextBeat+=.34;
+      },
+      silence(){
+        if(!this.ac)return;
+        this.master.gain.setValueAtTime(0,this.ac.currentTime);
+        for(const voice of this.voices)try{voice.stop()}catch(e){}
+        this.voices.clear();this.nextBeat=this.ac.currentTime;
+      },
+      reset(){this.silence();this.beat=0;this.duckUntil=0;this.unlock()}
+    };
+    function tone(freq,duration,type){soundscape.note(freq,duration,type)}
     function showMessage(text,duration=900){$('#message').textContent=text;$('#message').classList.add('show');clearTimeout(showMessage.timer);showMessage.timer=setTimeout(()=>$('#message').classList.remove('show'),duration)}
     function drawGround(scroll){ctx.fillStyle=colors.earth;ctx.fillRect(0,0,W,H);for(let i=0;i<18;i++){const y=(i*93+scroll*.45)%H,x=i%2?roadX-34:roadX+roadW+34;ctx.strokeStyle='rgba(81,62,42,.23)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(x,y,18+(i%4)*4,0,Math.PI*2);ctx.stroke();for(let j=0;j<5;j++)inkLine(x,y,x+Math.cos(j*1.25)*22,y+Math.sin(j*1.25)*22,'rgba(54,75,49,.42)',1)}drawRoadside(scroll);ctx.fillStyle='#d29a68';ctx.fillRect(roadX-14,0,roadW+28,H);ctx.strokeStyle='#724534';ctx.lineWidth=1;for(let y=(scroll%42)-42;y<H;y+=42){inkLine(roadX-13,y,roadX-4,y+8,'rgba(73,50,37,.4)');inkLine(roadX+roadW+4,y+8,roadX+roadW+13,y,'rgba(73,50,37,.4)')}}
     function drawRoadside(scroll){
@@ -127,9 +206,9 @@
     function drawRain(){if(time<18)return;const strength=clamp((time-18)/9,0,1);ctx.fillStyle=`rgba(35,76,107,${.09*strength})`;ctx.fillRect(0,0,W,H);ctx.strokeStyle=`rgba(230,240,235,${.24*strength})`;ctx.lineWidth=1;for(let i=0;i<60;i++){const x=(i*79+time*210)%W,y=(i*51+time*510)%H;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-6,y+16);ctx.stroke()}}
     function updateParticles(dt){particles.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=120*dt;p.life-=dt});particles=particles.filter(p=>p.life>0)}
     function updateHud(){$('#saved').textContent=saved;$('#roadHealth').textContent=Math.round(health);$('#lives').textContent='●'.repeat(lives)+'○'.repeat(3-lives);if(time>27){$('#weather').textContent='Monsoon rain';$('#place').textContent='Visibility is falling'}else if(time>18){$('#weather').textContent='The sky opens';$('#place').textContent='Water hides the damage'}else if(time>9){$('#weather').textContent='Evening traffic';$('#place').textContent='The road grows busier'}}
-    function loop(now){const dt=Math.min((now-last)/1000,.04)||0;last=now;if(running&&!paused)time+=dt;const scroll=time*(74+time*.35);ctx.save();if(shake>.2){ctx.translate(rand(-shake,shake),rand(-shake,shake));shake*=.84}drawGround(scroll);drawRoad(scroll);patches.forEach(p=>{p.y+=running&&!paused?(74+time*.7)*dt:0;p.life-=running&&!paused?dt:0;ctx.fillStyle='#3c3b36';irregularPath(p.x,p.y,p.rx,p.ry,p.seed);ctx.fill();ctx.strokeStyle='rgba(232,220,196,.22)';ctx.lineWidth=1;ctx.stroke()});patches=patches.filter(p=>p.y<H+70&&p.life>0);if(running&&!paused){if(time>spawnAt){hazards.push(new Hazard);spawnAt=time+Math.max(2.3,3.8-time*.025)}hazards.forEach(h=>h.update(dt));hazards=hazards.filter(h=>!h.dead||h.car.y<H+90);updateParticles(dt);updateHud();if(time>42)endGame()}hazards.forEach(h=>{drawApproach(h);h.draw();h.car.draw()});particles.forEach(p=>{ctx.globalAlpha=clamp(p.life*2,0,1);ctx.fillStyle=p.c;ctx.beginPath();ctx.ellipse(p.x,p.y,p.size,p.size*.7,0,0,Math.PI*2);ctx.fill()});ctx.globalAlpha=1;drawRain();ctx.restore();requestAnimationFrame(loop)}requestAnimationFrame(loop);
-    function startGame(){clearTimeout(impactTimer);paused=false;bikeOutcome=null;encounter=0;warningAt=0;releaseRepair();$('#humanCost').hidden=true;$('.report').hidden=false;$('#share').hidden=false;$('#pause').hidden=false;$('#pauseSheet').hidden=true;running=true;time=0;health=100;lives=3;saved=0;fixed=0;streak=0;bestStreak=0;hazards=[];patches=[];particles=[];active=null;firstRepair=true;spawnAt=.35;$('#startSheet').hidden=true;$('#endSheet').hidden=true;$('#hud').hidden=false;$('#instruction').style.opacity=1;$('#weather').textContent='Late afternoon';$('#place').textContent='District road, Maharashtra';$('#instruction').textContent=$('#assist').checked?'Hold a pothole until the surface is smooth':'Rub back and forth to fix the road';tone(220,.08,'sine');tone.ac?.resume();canvas.focus()}
-    function endGame(){if(!running)return;running=false;paused=false;releaseRepair();$('#pause').hidden=true;$('#pauseSheet').hidden=true;$('#hud').hidden=true;$('#instruction').style.opacity=0;$('#finalSaved').textContent=saved;$('#finalFixed').textContent=fixed;$('#finalHealth').textContent=Math.round(health)+'%';$('#finalStreak').textContent=bestStreak;$('#endKicker').textContent=lives?'The rain has passed':'The road is closed';$('#endTitle').innerHTML=health>65?'The road<br>remembers.':health>30?'Some made it<br>home.':'The road<br>gave way.';$('#endCopy').textContent=health>65?'A careful repair is quiet. So is the journey that reaches home safely.':health>30?'You held the road together, but every unfinished repair carried a human cost.':'Speed was not enough. The road needed attention before the traffic arrived.';if(bikeOutcome){
+    function loop(now){const dt=Math.min((now-last)/1000,.04)||0;last=now;if(running&&!paused)time+=dt;const scroll=time*(74+time*.35);ctx.save();if(shake>.2){ctx.translate(rand(-shake,shake),rand(-shake,shake));shake*=.84}drawGround(scroll);drawRoad(scroll);patches.forEach(p=>{p.y+=running&&!paused?(74+time*.7)*dt:0;p.life-=running&&!paused?dt:0;ctx.fillStyle='#3c3b36';irregularPath(p.x,p.y,p.rx,p.ry,p.seed);ctx.fill();ctx.strokeStyle='rgba(232,220,196,.22)';ctx.lineWidth=1;ctx.stroke()});patches=patches.filter(p=>p.y<H+70&&p.life>0);if(running&&!paused){if(time>spawnAt){hazards.push(new Hazard);spawnAt=time+Math.max(2.3,3.8-time*.025)}hazards.forEach(h=>h.update(dt));hazards=hazards.filter(h=>!h.dead||h.car.y<H+90);updateParticles(dt);updateHud();soundscape.tick();if(time>42)endGame()}hazards.forEach(h=>{drawApproach(h);h.draw();h.car.draw()});particles.forEach(p=>{ctx.globalAlpha=clamp(p.life*2,0,1);ctx.fillStyle=p.c;ctx.beginPath();ctx.ellipse(p.x,p.y,p.size,p.size*.7,0,0,Math.PI*2);ctx.fill()});ctx.globalAlpha=1;drawRain();ctx.restore();requestAnimationFrame(loop)}requestAnimationFrame(loop);
+    function startGame(){clearTimeout(impactTimer);paused=false;bikeOutcome=null;encounter=0;warningAt=0;releaseRepair();$('#humanCost').hidden=true;$('.report').hidden=false;$('#share').hidden=false;$('#pause').hidden=false;$('#pauseSheet').hidden=true;running=true;time=0;health=100;lives=3;saved=0;fixed=0;streak=0;bestStreak=0;hazards=[];patches=[];particles=[];active=null;firstRepair=true;spawnAt=.35;$('#startSheet').hidden=true;$('#endSheet').hidden=true;$('#hud').hidden=false;$('#instruction').style.opacity=1;$('#weather').textContent='Late afternoon';$('#place').textContent='District road, Maharashtra';$('#instruction').textContent=$('#assist').checked?'Hold a pothole until the surface is smooth':'Rub back and forth to fix the road';soundscape.reset();tone(220,.08,'sine');canvas.focus()}
+    function endGame(){if(!running)return;running=false;paused=false;soundscape.silence();releaseRepair();$('#pause').hidden=true;$('#pauseSheet').hidden=true;$('#hud').hidden=true;$('#instruction').style.opacity=0;$('#finalSaved').textContent=saved;$('#finalFixed').textContent=fixed;$('#finalHealth').textContent=Math.round(health)+'%';$('#finalStreak').textContent=bestStreak;$('#endKicker').textContent=lives?'The rain has passed':'The road is closed';$('#endTitle').innerHTML=health>65?'The road<br>remembers.':health>30?'Some made it<br>home.':'The road<br>gave way.';$('#endCopy').textContent=health>65?'A careful repair is quiet. So is the journey that reaches home safely.':health>30?'You held the road together, but every unfinished repair carried a human cost.':'Speed was not enough. The road needed attention before the traffic arrived.';if(bikeOutcome){
         $('.report').hidden=true;$('#share').hidden=true;
         $('#endKicker').textContent='A fictional encounter';
         $('#endTitle').innerHTML=bikeOutcome==='fatal'?'One journey.<br>Cut short.':'One rider.<br>Hurt.';
@@ -141,7 +220,7 @@
     canvas.addEventListener('pointerdown',e=>{
       if(!running||paused||pointerId!==null)return;
       const p=pointer(e);active=[...hazards].reverse().find(h=>!h.dead&&h.contains(p.x,p.y))||null;
-      if(active){e.preventDefault();pointerId=e.pointerId;lastPointer=p;rubBudget=0;canvas.setPointerCapture(e.pointerId);tone.ac?.resume();}
+      if(active){e.preventDefault();pointerId=e.pointerId;lastPointer=p;rubBudget=0;canvas.setPointerCapture(e.pointerId);soundscape.unlock();}
     });
     canvas.addEventListener('pointermove',e=>{
       if(!running||paused||!active||e.pointerId!==pointerId)return;
@@ -152,18 +231,18 @@
       rubBudget=Math.min(.10,rubBudget+distance/(active.r*7));
       active.strokes.push({x1:prev.x-active.x,y1:prev.y-active.y,x2:p.x-active.x,y2:p.y-active.y,p:active.fill});
       if(active.strokes.length>24)active.strokes.shift();
-      const now=performance.now();if(now-lastRubSound>85){tone(active.fill<.36?rand(130,190):active.fill<.78?rand(75,95):rand(210,240),.025,'triangle');lastRubSound=now}
+      const now=performance.now();if(now-lastRubSound>85){soundscape.grit(active.fill);lastRubSound=now}
       if(now-lastPulse>100){pulse(6);lastPulse=now}
     });
     canvas.addEventListener('pointerup',e=>{if(e.pointerId===pointerId)releaseRepair()});canvas.addEventListener('pointercancel',releaseRepair);canvas.addEventListener('lostpointercapture',releaseRepair);
     addEventListener('keydown',e=>{if(!running||paused||e.target.closest('button,input,a'))return;const lane=Number(e.key)-1;if(lane>=0&&lane<3){e.preventDefault();keyboardLane=lane;active=hazards.filter(h=>!h.dead&&h.lane===lane).sort((a,b)=>b.y-a.y)[0]||null}});
     addEventListener('keyup',e=>{if(Number(e.key)-1===keyboardLane)releaseRepair()});
-    function pauseGame(){if(!running||paused)return;paused=true;releaseRepair();$('#pauseSheet').hidden=false;$('#resume').focus();pulse(0)}
-    $('#pause').onclick=pauseGame;$('#resume').onclick=()=>{paused=false;$('#pauseSheet').hidden=true;canvas.focus();tone.ac?.resume()};
+    function pauseGame(){if(!running||paused)return;paused=true;soundscape.silence();releaseRepair();$('#pauseSheet').hidden=false;$('#resume').focus();pulse(0)}
+    $('#pause').onclick=pauseGame;$('#resume').onclick=()=>{paused=false;$('#pauseSheet').hidden=true;canvas.focus();soundscape.unlock()};
     document.addEventListener('visibilitychange',()=>{if(document.hidden){pauseGame();pulse(0)}});addEventListener('blur',pauseGame);
     canvas.tabIndex=0;
     $('#haptic').hidden=typeof navigator.vibrate!=='function'||!navigator.maxTouchPoints;$('#haptic').onclick=()=>{hapticsOn=!hapticsOn;$('#haptic').textContent=hapticsOn?'Vibration on':'Vibration off';$('#haptic').setAttribute('aria-pressed',hapticsOn);if(!hapticsOn)navigator.vibrate(0)};
-    $('#begin').onclick=startGame;$('#again').onclick=startGame;$('#sound').onclick=()=>{soundOn=!soundOn;$('#sound').setAttribute('aria-pressed',soundOn);$('#sound').textContent=soundOn?'♪':'×';$('#sound').setAttribute('aria-label',soundOn?'Mute sound':'Turn sound on')};$('#share').onclick=async()=>{const text=`My Gaddha road report: ${saved} journeys saved and ${fixed} potholes repaired. A careful repair is quiet. So is the journey that reaches home safely.`;try{if(navigator.share)await navigator.share({title:'Gaddha — road report',text});else{await navigator.clipboard.writeText(text);showMessage('Road report copied.',1200)}}catch(e){}}
+    $('#begin').onclick=startGame;$('#again').onclick=startGame;$('#sound').onclick=()=>{soundOn=!soundOn;if(soundOn)soundscape.unlock();else soundscape.silence();$('#sound').setAttribute('aria-pressed',soundOn);$('#sound').textContent=soundOn?'♪':'×';$('#sound').setAttribute('aria-label',soundOn?'Mute sound':'Turn sound on')};$('#share').onclick=async()=>{const text=`My Gaddha road report: ${saved} journeys saved and ${fixed} potholes repaired. A careful repair is quiet. So is the journey that reaches home safely.`;try{if(navigator.share)await navigator.share({title:'Gaddha — road report',text});else{await navigator.clipboard.writeText(text);showMessage('Road report copied.',1200)}}catch(e){}}
   </script>
 </body>
 </html>

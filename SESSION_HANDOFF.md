@@ -45,3 +45,5 @@ Do not add metagame systems until this encounter feels satisfying.
 ## Latest continuation point — 2026-09-15
 
 The mobile rubbing pass is implemented; see README.md for the changed behavior and verification. Primary target is iPhone/Safari. Next work should be guided by Karan's physical playtest, especially gesture effort and emotional clarity. Do not assume Chrome viewport testing proves Safari, touch, sound, or haptic behavior. Continue refining the artwork after the core encounter feels right.
+
+The next sound playtest should assess music/horn balance and whether the synthesized truck voice evokes the supplied reference. Truck passage is harmless in the game and must never award rescue credit. Use `npm test` for gameplay and audio lifecycle regressions.
