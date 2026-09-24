@@ -47,3 +47,14 @@ Do not add metagame systems until this encounter feels satisfying.
 The mobile rubbing pass is implemented; see README.md for the changed behavior and verification. Primary target is iPhone/Safari. Next work should be guided by Karan's physical playtest, especially gesture effort and emotional clarity. Do not assume Chrome viewport testing proves Safari, touch, sound, or haptic behavior. Continue refining the artwork after the core encounter feels right.
 
 The next sound playtest should assess music/horn balance and whether the synthesized truck voice evokes the supplied reference. Truck passage is harmless in the game and must never award rescue credit. Use `npm test` for gameplay and audio lifecycle regressions.
+
+## Latest continuation point — 2026-09-24
+
+Read `ROADMAP.md` before choosing work. It contains Karan's feedback that the interface still has an "AI designed" tell, a token-level design plan to fix that within the `DESIGN.md` palette, a motion audit, and the sound, haptic, music, learning and performance plans, each with an ordered list of slices.
+
+Before restyling anything, load `.agents/skills/frontend-design/SKILL.md`. Before changing any animation or timing, load `.agents/skills/12-principles-of-animation/SKILL.md`. Both are installed in this repository and symlinked for Claude Code under `.claude/skills/`.
+
+Hosting: Vercel is approved and configured. `npm run build` writes `dist/` and fills in the site URL for link previews. Do not change the deployment target without asking.
+
+Start with `ROADMAP.md` §10, slice 1 (the interface pass), and keep each slice playable, tested with `npm test`, and committed on its own.
+
