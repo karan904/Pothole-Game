@@ -3,7 +3,8 @@
 import { mkdirSync, copyFileSync, readFileSync, writeFileSync } from 'node:fs';
 
 const env = process.env;
-let site = env.SITE_URL || env.VERCEL_PROJECT_PRODUCTION_URL || env.VERCEL_URL || '';
+// Falls back to the published site so previews built elsewhere still point at the live game.
+let site = env.SITE_URL || env.VERCEL_PROJECT_PRODUCTION_URL || env.VERCEL_URL || 'https://gaddha-game.vercel.app';
 if (site && !/^https?:\/\//.test(site)) site = 'https://' + site;
 site = site.replace(/\/$/, '');
 

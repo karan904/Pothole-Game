@@ -47,7 +47,7 @@ The game is a static site. `vercel.json` tells Vercel to run `npm run build` and
 
 From a terminal instead: `npx vercel` for a preview, `npx vercel --prod` for production.
 
-Link previews (WhatsApp, iMessage, Slack) use `og.jpg` and the `og:` tags in `index.html`. The build fills their absolute URL from Vercel's `VERCEL_PROJECT_PRODUCTION_URL`. On a custom domain, set `SITE_URL` (for example `https://gaddha.in`) in the project's environment variables and redeploy.
+Link previews (WhatsApp, iMessage, Slack) use `og.jpg` and the `og:` tags in `index.html`. The build fills their absolute URL from Vercel's `VERCEL_PROJECT_PRODUCTION_URL`, falling back to the live URL above. On a custom domain, set `SITE_URL` (for example `https://gaddha.in`) in the project's environment variables and redeploy.
 
 ## Project map
 
