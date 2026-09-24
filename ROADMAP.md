@@ -175,6 +175,8 @@ Desktop has plenty of headroom. The audience's likeliest device is a mid-range A
 
 ## 9. Hosting (done) and sharing
 
+- Live at <https://gaddha-game.vercel.app>.
+
 - `vercel.json` + `scripts/build.mjs` build `dist/` and fill in the absolute site URL for `og:url` and `og:image` from Vercel's `VERCEL_PROJECT_PRODUCTION_URL` (or `SITE_URL`). `og.jpg` is a 1200×630 frame of the game.
 - Share button includes the game URL.
 - Next: a web-app manifest with icons and `display: standalone` so "Add to Home Screen" removes Safari's bottom bar; test the link preview in WhatsApp.

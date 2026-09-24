@@ -35,6 +35,10 @@ npm run build
 
 ## Deploy to Vercel
 
+**Live:** <https://gaddha-game.vercel.app> (Vercel project `gaddha-game`, first published 2026-09-24).
+
+The first deployment was pushed through the Vercel API from the built files, so the project is not yet linked to GitHub. To make every push redeploy automatically: in Vercel, open *Account settings → Authentication* and connect GitHub, then in the `gaddha-game` project open *Settings → Git* and connect `karan904/Pothole-Game`. Until then, redeploy with `npx vercel --prod` from this folder.
+
 The game is a static site. `vercel.json` tells Vercel to run `npm run build` and serve `dist/`.
 
 1. Push the branch to GitHub.
